@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16060b">
+<title>Tableau Périodique Interactif - Sciences 1ère Préparatoire</title>
+<style>
+:root{color-scheme:dark;--bg:#07182a;--panel:#10263c;--muted:#9fb3c8;--line:#29445e;--hot-red:#ff304f;--deep-red:#9e1230;--soft-red:#ff8294}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 50% 20%,#123451 0,#091c30 48%,#061321 100%);color:#eef6ff;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;min-height:100vh;transition:filter .3s ease}
+
+/* Smooth Fixed Liquid Blue Blur Overlay */
+body.modal-open, body.quiz-mode {
+ overflow: hidden !important;
+}
+
+body.modal-open::before, body.quiz-mode::before {
+ content: "";
+ position: fixed;
+ inset: 0;
+ z-index: 9990;
+ background: radial-gradient(circle at 50% 30%, rgba(14, 165, 233, 0.45), rgba(3, 105, 161, 0.6) 50%, rgba(3, 15, 38, 0.88) 100%);
+ backdrop-filter: blur(18px) saturate(190%);
+ -webkit-backdrop-filter: blur(18px) saturate(190%);
+ animation: liquidPulse 6s ease-in-out infinite alternate;
+}
+
+@keyframes liquidPulse {
+ 0% { opacity: 0.88; }
+ 100% { opacity: 1; }
+}
+
+header{text-align:center;padding:76px 16px 15px}
+h1{font-size:clamp(1.35rem,3vw,2.15rem);margin:0 0 7px;letter-spacing:.015em;color:#f4ffff;text-shadow:0 0 5px #fff,0 0 12px #ff304f,0 0 28px #ff1744,0 0 52px #ff6b81;animation:titleFlicker 5.5s infinite}
+header p{margin:0;color:#ffb3b3;font-size:.9rem;text-shadow:0 0 9px #ff4d6d}
+.creator-name{margin:0 auto 12px!important;font-size:clamp(.9rem,2.5vw,1.15rem)!important;font-weight:950;letter-spacing:.18em;color:#ff304f!important;text-shadow:0 0 8px #ff304f,0 0 20px #ff1744;}
+.creator-credit{margin-top:6px!important;font-size:.82rem!important;letter-spacing:.08em;color:#38bdf8!important;text-shadow:0 0 8px #00cfff66}
+
+main{width:100%;max-width:1600px;margin:0 auto;padding:0 18px 30px}
+.toolbar{background:linear-gradient(135deg,#310712eF,#2f111feF 55%,#30071bef);border:1px solid #ff304f;border-radius:18px;padding:15px;display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px;box-shadow:0 0 8px #ff203f66,inset 0 0 20px #ff04300d,0 0 30px #ff2c7b22}
+.control{display:flex;flex-direction:column;gap:7px;min-width:135px}
+.control label{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:#c99db4;font-weight:800}
+select,input{background:#300918;color:#fff1f7;border:1px solid #6d3852;border-radius:9px;padding:10px 12px;font:inherit;outline:none;transition:box-shadow .2s,border-color .2s,transform .2s}
+select:focus,input:focus{border-color:#ff7aff;box-shadow:0 0 10px #ff2ff588,0 0 24px #ff4d9b44}
+button{border:1px solid #7d415b;background:#541b34;color:#fdf8ff;padding:10px 14px;border-radius:10px;font:inherit;font-weight:700;cursor:pointer;transition:box-shadow .2s,border-color .2s,transform .2s}
+button:hover{background:#712749;box-shadow:0 0 10px #ff2ff588,0 0 24px #ff4d9b44;border-color:#ff7aff}
+.reset{margin-left:auto;margin-right:0;background:#fcf2f5;color:#48172c;border-color:#fff}
+
+.legend{display:flex;flex-wrap:wrap;gap:9px 13px;align-items:center;padding:15px 4px;color:#dfbfa5;font-size:.75rem}
+.legend span{display:flex;gap:6px;align-items:center}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;box-shadow:0 0 8px currentColor,0 0 15px currentColor}
+
+.table-wrap{overflow:auto;padding:8px 2px 16px;zoom:var(--table-zoom,1);transform-origin:top left}
+
+/* Grid Layout for Periods, Groups, and Blocks */
+.grid-container {
+ display: grid;
+ grid-template-columns: 40px repeat(18, minmax(70px, 1fr));
+ gap: 5px;
+ min-width: 1340px;
+ direction: ltr;
+}
+
+.group-header {
+ text-align: center;
+ font-size: 0.75rem;
+ font-weight: 800;
+ color: #f43f5e;
+ background: rgba(42, 15, 23, 0.6);
+ border: 1px solid rgba(244, 63, 94, 0.25);
+ border-radius: 6px;
+ padding: 4px 0;
+ display: flex;
+ flex-direction: column;
+ justify-content: center;
+ align-items: center;
+ text-shadow: 0 0 6px rgba(244, 63, 94, 0.5);
+}
+.group-header span.cas-name {
+ font-size: 0.58rem;
+ color: #b89494;
+ font-weight: 600;
+}
+
+.period-header {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-size: 0.85rem;
+ font-weight: 900;
+ color: #38bdf8;
+ background: rgba(15, 23, 42, 0.6);
+ border: 1px solid rgba(56, 189, 248, 0.25);
+ border-radius: 6px;
+ text-shadow: 0 0 6px rgba(56, 189, 248, 0.5);
+}
+
+.block-label {
+ grid-column: span 18;
+ font-size: 0.78rem;
+ font-weight: 800;
+ letter-spacing: 0.08em;
+ padding: 6px 12px;
+ margin-top: 10px;
+ border-radius: 8px;
+ text-align: center;
+ text-transform: uppercase;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ gap: 10px;
+}
+.block-s-bg { background: rgba(59, 130, 246, 0.15); border: 1px solid #3b82f6; color: #93c5fd; }
+.block-p-bg { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; }
+.block-d-bg { background: rgba(234, 179, 8, 0.15); border: 1px solid #eab308; color: #fde047; }
+.block-f-bg { background: rgba(168, 85, 247, 0.15); border: 1px solid #a855f7; color: #d8b4fe; }
+
+.periodic{display:contents}
+.element{position:relative;min-height:96px;border:1px solid var(--edge);border-radius:9px;padding:4px 4px 3px;background:var(--tile);color:#f6fbff;text-align:left;display:flex;flex-direction:column;align-items:stretch;justify-content:space-between;transition:transform .18s ease,filter .22s ease,box-shadow .22s ease;overflow:hidden;box-shadow:0 0 6px color-mix(in srgb,var(--edge) 70%,transparent),inset 0 0 14px color-mix(in srgb,var(--edge) 16%,transparent)}
+.element:hover,.element:focus-visible,.element.match{transform:translateY(-3px) scale(1.025);z-index:3;box-shadow:0 0 10px var(--edge),0 0 20px var(--edge),0 0 35px color-mix(in srgb,var(--edge) 60%,transparent),inset 0 0 20px #ffffff20;filter:brightness(1.35) saturate(1.3);outline:2px solid #fff8}
+
+/* Top Row: Z and A numbers centered neatly side by side above the symbol */
+.element .tile-header-row {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ width: 100%;
+ padding: 0 1px;
+ margin-bottom: 1px;
+}
+.element .badge-z {
+ color: #fb7185;
+ background: rgba(251, 113, 133, 0.2);
+ border: 1px solid rgba(251, 113, 133, 0.4);
+ padding: 1px 3px;
+ border-radius: 3px;
+ font-size: 0.55rem;
+ font-weight: 800;
+ text-shadow: 0 0 5px #fb7185;
+ line-height: 1;
+}
+.element .badge-a {
+ color: #38bdf8;
+ background: rgba(56, 189, 248, 0.2);
+ border: 1px solid rgba(56, 189, 248, 0.4);
+ padding: 1px 3px;
+ border-radius: 3px;
+ font-size: 0.55rem;
+ font-weight: 800;
+ text-shadow: 0 0 5px #38bdf8;
+ line-height: 1;
+}
+
+/* Middle Row: Symbol centered nicely */
+.element .tile-symbol-row {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ width: 100%;
+ margin: 0;
+}
+.element .symbol {
+ font-size: 1.25rem;
+ font-weight: 850;
+ line-height: 1.1;
+ text-shadow: 0 0 5px #fff,0 0 13px var(--edge),0 0 25px var(--edge);
+ text-align: center;
+}
+
+/* Subshell Configuration Badge Row */
+.element .tile-config-row {
+ font-size: 0.52rem;
+ font-family: monospace;
+ color: #ffd0d9;
+ background: rgba(0, 0, 0, 0.25);
+ border-radius: 3px;
+ text-align: center;
+ padding: 1px 0;
+ margin: 1px 0;
+ font-weight: 700;
+ letter-spacing: -0.02em;
+}
+
+/* Bottom Row: Element name centered in a sleek dark banner */
+.element .tile-name-row {
+ background: rgba(0, 0, 0, 0.35);
+ border: 1px solid rgba(255, 255, 255, 0.08);
+ border-radius: 4px;
+ padding: 2px 2px;
+ text-align: center;
+ width: 100%;
+ margin-top: auto;
+}
+.element .name {
+ font-size: 0.56rem;
+ white-space: nowrap;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ color: #f1f5f9;
+ font-weight: 700;
+ display: block;
+ letter-spacing: 0.01em;
+}
+
+/* Subshell Block Borders & Indicators */
+.element[data-block="s"] { border-top: 3px solid #3b82f6; }
+.element[data-block="p"] { border-top: 3px solid #ef4444; }
+.element[data-block="d"] { border-top: 3px solid #eab308; }
+.element[data-block="f"] { border-top: 3px solid #a855f7; }
+
+.element .block-badge {
+ position: absolute;
+ top: 2px;
+ right: 3px;
+ font-size: 0.52rem;
+ font-weight: 900;
+ text-transform: lowercase;
+ opacity: 0.7;
+}
+.element[data-block="s"] .block-badge { color: #93c5fd; }
+.element[data-block="p"] .block-badge { color: #fca5a5; }
+.element[data-block="d"] .block-badge { color: #fde047; }
+.element[data-block="f"] .block-badge { color: #d8b4fe; }
+
+.alkali{--tile:#563b40;--edge:#b87578}.alkaline{--tile:#59483a;--edge:#c39b69}.transition{--tile:#214e70;--edge:#4b8eb5}.post{--tile:#175c69;--edge:#4cb6c4}.metalloid{--tile:#315c43;--edge:#7ab77b}.nonmetal{--tile:#146d5d;--edge:#42c8a7}.halogen{--tile:#625a2d;--edge:#c9bd5b}.noble{--tile:#203e69;--edge:#6a9de0}.lanth{--tile:#403963;--edge:#998be1}.act{--tile:#60344f;--edge:#d17ba9}.unknown{--tile:#34414c;--edge:#8997a4}
+
+.series-wrap {
+ grid-column: 2 / span 18;
+ display: grid;
+ grid-template-columns: repeat(18, minmax(70px, 1fr));
+ gap: 5px;
+ margin-top: 6px;
+}
+.series-wrap .element { min-height: 88px; }
+
+.info{margin-top:10px;background:linear-gradient(135deg,#071b31eF,#11152feF 55%,#071f30ef);border:1px solid #39e8ff;border-radius:14px;padding:15px;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;min-height:105px;box-shadow:0 0 8px #00d9ff66,inset 0 0 20px #04d9ff0d,0 0 30px #7b2cff22}
+.info-symbol{font-size:2.2rem;font-weight:900;color:#fff;min-width:76px;text-align:center;border-radius:12px;padding:12px;background:#193d59;border:1px solid #416985;box-shadow:0 0 15px #22eaff66,0 0 30px #9b4dff33;text-shadow:0 0 12px #fff}
+.info h2{font-size:1.1rem;margin:0 0 5px}
+.info p{margin:0;color:#b8cada;line-height:1.5}
+.stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px}
+.pill{border:1px solid #35536c;border-radius:999px;padding:5px 9px;color:#dceaf6;font-size:.75rem;box-shadow:inset 0 0 10px #36e9ff0b,0 0 8px #27dcff16}
+
+.hidden{display:none!important}
+.element.dim{opacity:.15;filter:saturate(.4)}
+.foot{text-align:center;color:#7892a8;font-size:.72rem;margin-top:20px}
+
+.atom-panels{grid-column:1/-1;display:grid;grid-template-columns:1.4fr 1fr;gap:12px;margin-top:8px}
+.atom-panel{border:1px solid #36536c;border-radius:12px;padding:12px;background:#081725;min-width:0}
+.atom-panel h3{font-size:.92rem;margin:0 0 10px;color:#e9f7ff}
+.shell-model{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;min-height:76px;padding:6px 2px;direction:ltr}
+.shell-chip{border:2px solid #ff526b99;border-left:0;border-radius:0 48px 48px 0;padding:5px 5px 5px 2px;color:#fff0f3;background:linear-gradient(180deg,#32121e,#24101a);width:42px;height:62px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;box-shadow:0 0 10px #ff304f16,inset 0 0 12px #ff304f0c}
+.shell-chip b{display:block;color:#ff8796;font-size:1.05rem;line-height:1.1}
+.shell-chip span{font-size:.8rem;font-weight:750}
+.lewis-model{min-height:68px;display:flex;align-items:center;justify-content:center}
+.lewis-symbol{position:relative;display:inline-flex;align-items:center;justify-content:center;width:104px;height:88px;font-size:2rem;font-weight:850;color:#fff}
+.lewis-dot{position:absolute;font-size:1.25rem;line-height:1;color:#ff526b;text-shadow:0 0 8px #ff304f;transform:translate(-50%,-50%);pointer-events:none}
+.diagram-caption{font-size:.75rem;color:#9fb7c9;margin:8px 0 0;line-height:1.4}
+
+.neon-toggle{position:fixed!important;top:14px!important;right:14px!important;left:auto!important;bottom:auto!important;z-index:50;background:linear-gradient(110deg,#0284c7,#0369a1 55%,#071d30);color:#fff;border:1px solid #38bdf8;box-shadow:0 0 8px #00cfff88,0 0 20px #0284c755;text-shadow:0 0 8px #fff7;letter-spacing:.04em}
+
+/* Controls & Launch */
+.table-zoom-controls{display:flex;align-items:center;justify-content:center;gap:10px;margin:12px auto;flex-wrap:wrap}
+.table-zoom-controls button{min-width:48px;padding:10px 15px;border:1px solid #38bdf8;border-radius:12px;background:#081f36;color:#fff;font-size:1.15rem;font-weight:900;cursor:pointer;box-shadow:0 0 12px #0ea5e922}
+#zoomValue{min-width:58px;text-align:center;color:#bae6fd;font-weight:800}
+
+.quiz-launch{display:block;width:100%;margin:18px 0;padding:18px 20px;border:1px solid #38bdf8;border-radius:16px;background:linear-gradient(110deg,#0284c7,#0369a1);color:#fff;font-size:1.15rem;font-weight:800;box-shadow:0 0 18px #0ea5e935;cursor:pointer}
+.quiz-launch:hover{filter:brightness(1.08);box-shadow:0 0 24px #38bdf855}
+
+/* Centered Game Selection Modal */
+.game-modal{position:fixed!important;inset:0!important;z-index:99999!important;display:flex!important;align-items:center!important;justify-content:center!important;background:transparent;padding:15px;box-sizing:border-box}
+.game-modal.hidden{display:none!important}
+.game-modal-card{position:relative!important;width:100%!important;max-width:680px!important;max-height:85vh!important;overflow-y:auto!important;padding:24px;border:1px solid #ff304f;border-radius:24px;background:radial-gradient(circle at 50% 15%,#480f25 0,#290817 60%,#14030a 100%);box-shadow:0 20px 60px rgba(0,0,0,0.8),0 0 40px rgba(255,48,79,0.3);text-align:center;animation:modalPop .28s ease-out;box-sizing:border-box}
+
+.modal-close{position:absolute;top:12px;right:14px;left:auto;width:36px;height:36px;padding:0;border-radius:50%;font-size:1.5rem;background:#380c21;border:1px solid #ff304f;color:#fff;cursor:pointer;display:grid;place-items:center;box-shadow:0 0 10px rgba(255,48,79,0.3)}
+.modal-kicker{font-size:.7rem;letter-spacing:.2em;color:#ff304f;font-weight:900;margin:4px 0 9px}
+.game-modal-card h2{font-size:clamp(1.6rem,5vw,2.2rem);margin:0;color:#fff;text-shadow:0 0 20px rgba(255,48,79,0.6)}
+.modal-desc{color:#ffd4dc;margin:7px 0 18px}
+
+/* Single Column Vertical Layout for Games Gallery */
+.game-gallery{display:grid;grid-template-columns:1fr;gap:14px;margin-top:18px;text-align:left}
+.game-card{min-width:0;padding:14px;border:1px solid #c70233;border-radius:18px;background:linear-gradient(145deg,#420c24,#280717);color:#fff;text-align:left;cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s;display:flex;flex-direction:row;align-items:center;gap:16px}
+.game-card:hover{transform:translateY(-3px);border-color:#ff304f;box-shadow:0 8px 25px rgba(255,48,79,0.35)}
+.game-thumb{width:110px;height:80px;flex-shrink:0;display:grid;place-items:center;position:relative;overflow:hidden;border-radius:12px;margin-bottom:0;background:radial-gradient(circle at 50% 40%,#5f1e35,#2f0a17 70%);border:1px solid #ff304f}
+.game-thumb .big-icon{font-size:2.2rem;filter:drop-shadow(0 0 14px rgba(255,48,79,0.8))}
+.game-thumb .mini-elements{position:absolute;inset:6px;display:flex;justify-content:space-between;align-items:flex-start;font-size:.65rem;font-weight:900;color:#ff304f}
+.game-thumb .mini-elements span:nth-child(2){align-self:flex-end;color:#ffa5b4}
+.game-card-content{flex:1;display:flex;flex-direction:column}
+.game-card-title{font-weight:900;font-size:1.05rem;line-height:1.3;margin:0 0 4px;color:#fff0f3}
+.game-card-desc{font-size:.8rem;line-height:1.4;color:#b8949f;margin:0 0 6px}
+.game-card-foot{font-size:.75rem;color:#ff304f;font-weight:800}
+
+/* Centered Quiz Active Overlay Window */
+.quiz{display:none}
+body.quiz-mode #quiz{
+ display:block!important;
+ position:fixed!important;
+ top:50%!important;
+ left:50%!important;
+ transform:translate(-50%,-50%)!important;
+ z-index:10000!important;
+ width:calc(100% - 30px)!important;
+ max-width:780px!important;
+ max-height:85vh!important;
+ overflow-y:auto!important;
+ margin:0!important;
+ padding:24px!important;
+ border:2px solid #ff304f!important;
+ border-radius:24px!important;
+ background:radial-gradient(ellipse at 80% 10%,#a10230 0,#380718 50%,#1a030d 100%)!important;
+ box-shadow:0 0 45px rgba(255,48,79,0.5), 0 0 15px rgba(255,48,79,0.3)!important;
+}
+.quiz-head{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.quiz h2{margin:0;font-size:1.3rem;color:#fff0f3;text-shadow:0 0 10px #ff304f,0 0 20px #840222}
+.quiz-sub{color:#ffd4dc;font-size:.88rem;margin:6px 0 14px}
+.quiz-meta{display:flex;gap:8px;flex-wrap:wrap}
+.quiz-badge{border:1px solid #c70233;background:#420c24;color:#fce7f0;border-radius:999px;padding:6px 12px;font-size:.8rem;font-weight:700;box-shadow:0 0 8px rgba(255,48,79,0.2)}
+.quiz-question{font-size:1.15rem;font-weight:800;line-height:1.45;margin:18px 0;color:#ffffff;text-shadow:0 0 10px rgba(255,255,255,0.2)}
+.quiz-answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.quiz-answer{background:linear-gradient(135deg,#4a0c20,#300814);border:1px solid #c70233;color:#fff0f3;border-radius:14px;padding:14px;text-align:left;min-height:54px;font-weight:600;transition:background .2s,border .2s,transform .2s,box-shadow .2s}
+.quiz-answer:hover:not(:disabled){transform:translateY(-2px);border-color:#ff304f;box-shadow:0 0 16px rgba(255,48,79,0.4);background:#5c1028}
+.quiz-answer.correct{background:#065f46!important;border-color:#34d399!important;box-shadow:0 0 18px rgba(52,211,153,0.4)!important;color:#ecfdf5!important}
+.quiz-answer.wrong{background:#881337!important;border-color:#f43f5e!important;box-shadow:0 0 18px rgba(244,63,94,0.4)!important;color:#fff1f2!important}
+.quiz-feedback{min-height:26px;margin:14px 0 6px;color:#ffa5b4;font-size:.92rem;font-weight:700}
+.quiz-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.quiz-primary{background:linear-gradient(110deg,#c70233,#a10228);border:1px solid #ff304f;color:#fff;box-shadow:0 0 16px rgba(255,48,79,0.4);font-weight:800}
+.quiz-primary:hover{background:linear-gradient(110deg,#ff174f,#c70233);box-shadow:0 0 22px rgba(255,48,79,0.6)}
+.quiz-progress{height:6px;background:#420c24;border-radius:99px;overflow:hidden;margin-top:14px;border:1px solid #c70233}
+.quiz-progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff416c,#ff4b2b);box-shadow:0 0 12px #ff304f;transition:width .35s}
+.return-table-button{display:block;width:100%;margin:18px 0 4px;padding:14px 18px;border:1px solid #ff304f;border-radius:14px;background:#360817;color:#fff;font-size:1rem;font-weight:800;cursor:pointer;box-shadow:0 0 16px rgba(255,48,79,0.25);transition:background .2s,transform .2s}
+.return-table-button:hover{background:#570e27;transform:translateY(-1px);box-shadow:0 0 22px rgba(255,48,79,0.4)}
+
+
+/* Chemistry mixer */
+.mixer-launch{display:block;width:100%;margin:12px 0;padding:16px;border:1px solid #ff304f;border-radius:14px;background:linear-gradient(110deg,#9e1230,#300817);color:#fff;font-size:1.05rem;font-weight:900;box-shadow:0 0 18px #ff304f30}
+.mixer-panel{width:100%;max-width:780px;margin:14px auto 22px;padding:18px;border:2px solid #ff304f;border-radius:20px;background:radial-gradient(ellipse at top,#421023,#10040a);box-shadow:0 0 28px #ff304f30}
+.mixer-panel.hidden{display:none!important}.mixer-panel h2{text-align:center;margin:0 0 6px}.mixer-help{text-align:center;color:#ffd4dc;font-size:.88rem;margin:0 0 16px}
+ .mixer-slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:stretch}.mixer-slot{position:relative;padding:12px;border:1px solid #76233b;border-radius:12px;background:linear-gradient(145deg,#250812,#15050b);min-width:0;box-shadow:inset 0 0 14px #ff304f0a}.mixer-slot label{display:block;font-size:.78rem;color:#ffb3c1;font-weight:800;margin:0 0 6px}.mixer-slot select,.mixer-slot input{width:100%;min-width:0;margin-bottom:8px}.mixer-slot .slot-title{display:flex;align-items:center;justify-content:space-between;color:#fff;font-weight:900;margin-bottom:8px}.mixer-slot .slot-remove{border:1px solid #a82b46;background:#3a0a1b;color:#ffdbe2;border-radius:7px;padding:3px 8px;font-size:.75rem}.mixer-plus{display:none}.mixer-add{border:1px dashed #ff526b;background:#260813;color:#ffdbe2;border-radius:11px;padding:11px 14px;font-weight:800}.mixer-add:disabled{opacity:.45;cursor:not-allowed}.mixer-visual{margin:12px auto 6px;max-width:380px;min-height:145px;display:flex;align-items:center;justify-content:center;border:1px solid #682038;border-radius:14px;background:radial-gradient(ellipse,#310b1b,#10040a);overflow:hidden}.mixer-visual svg{width:100%;max-width:360px;height:auto;display:block}.mixer-visual-note{font-size:.72rem;color:#bfa1aa;text-align:center;margin:3px 0 0}
+.mixer-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.mixer-result{margin-top:14px;padding:14px;border-radius:12px;background:#13050b;border:1px solid #7d2941;line-height:1.6;min-height:60px}.mixer-formula{font-size:1.8rem;font-weight:950;color:#fff;text-align:center;text-shadow:0 0 14px #ff304f;margin:4px} .mixer-ok{color:#86efac}.mixer-no{color:#fda4af}
+.mixer-catalog{margin-top:14px;border:1px solid #8d2942;border-radius:12px;overflow:hidden;background:#16060c}
+.mixer-catalog.hidden{display:none!important}.mixer-catalog-head{padding:12px;background:#300817;color:#fff}
+.mixer-catalog-head p{margin:5px 0 0;color:#ffd4dc;font-size:.85rem;line-height:1.5}
+.mixer-catalog-search{width:100%;padding:10px;margin:10px 0;border:1px solid #8d2942;border-radius:9px;background:#10040a;color:#fff}
+.mixer-catalog-scroll{max-height:390px;overflow:auto}
+.mixer-catalog table{width:100%;border-collapse:collapse;font-size:.83rem}
+.mixer-catalog th,.mixer-catalog td{padding:9px 8px;text-align:left;border-bottom:1px solid #4b1728;white-space:nowrap}
+.mixer-catalog th{position:sticky;top:0;background:#4b1022;color:#fff;z-index:1}
+.mixer-catalog td{color:#ffe7ec}.mixer-catalog tr:nth-child(even){background:#210914}
+.mixer-catalog .formula-cell{font-weight:900;color:#ff7188;font-size:1rem}
+@media(max-width:520px){.mixer-catalog table{font-size:.75rem}.mixer-catalog th,.mixer-catalog td{padding:8px 6px}}
+@media(max-width:520px){.mixer-panel{padding:12px}.mixer-slots{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.mixer-slot{padding:9px}.mixer-slot select{font-size:.8rem;padding:8px}.mixer-slot label{font-size:.72rem}.mixer-actions button{flex:1 1 44%;min-width:0}}
+
+@media(max-width:640px){
+ .game-card{padding:10px;gap:10px}
+ .game-thumb{width:80px;height:65px}
+ .game-thumb .big-icon{font-size:1.6rem}
+ .game-modal{padding:7px}
+ .game-modal-card{padding:14px;max-height:92vh}
+ .game-card-title{font-size:.9rem}
+ .game-card-desc{font-size:.72rem}
+ .game-card-foot{font-size:.68rem}
+ .quiz-answers{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+
+/* Custom settings + theme system */
+.settings-anchor{position:fixed;top:12px;left:12px;z-index:10010;font-size:.84rem;color:#fff}
+.settings-toggle{display:flex;align-items:center;gap:7px;background:rgba(18,5,10,.92);border:1px solid var(--hot-red);border-radius:12px;padding:9px 12px;box-shadow:0 0 18px color-mix(in srgb,var(--hot-red) 35%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.settings-panel{position:absolute;top:48px;left:0;width:min(300px,calc(100vw - 24px));padding:14px;gap:10px;background:rgba(17,8,18,.96);border:1px solid var(--hot-red);border-radius:16px;box-shadow:0 18px 55px #0009,0 0 22px color-mix(in srgb,var(--hot-red) 25%,transparent);backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%)}
+.settings-panel:not([hidden]){display:flex;flex-direction:column}.settings-heading{display:flex;align-items:center;justify-content:space-between;font-size:1rem;color:#fff}.settings-close{padding:2px 9px;font-size:1.2rem;line-height:1.4}.settings-panel label,.settings-theme-title{font-size:.76rem;font-weight:850;color:#ffd4dc;margin-top:3px}.settings-panel select{width:100%;padding:9px}.theme-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.theme-choice{display:flex;align-items:center;gap:8px;text-align:left;background:#24101a;border-color:#553041;padding:9px;font-size:.8rem}.theme-dot{width:16px;height:16px;border-radius:50%;display:inline-block;flex:none;border:1px solid #ffffff66}.default-dot{background:linear-gradient(135deg,#ffffff,#e2e8f0);box-shadow:inset 0 0 0 1px #94a3b8}.red-dot{background:linear-gradient(135deg,#ff304f,#69091c)}.blue-dot{background:linear-gradient(135deg,#38bdf8,#082c75)}.black-dot{background:linear-gradient(135deg,#777,#050505)}.glass-dot{background:linear-gradient(135deg,#8be9ff99,#ff9bcf99,#ffffffaa);box-shadow:0 0 9px #80eaff66}
+body[data-theme="red"]{--bg:#16060b;--panel:#260a13;--line:#6e1d32;--hot-red:#ff304f;--deep-red:#9e1230;--soft-red:#ff8294}
+body[data-theme="blue"]{--bg:#061323;--panel:#0b2743;--line:#1d5a87;--hot-red:#38bdf8;--deep-red:#075985;--soft-red:#93e4ff}
+body[data-theme="black"]{--bg:#080808;--panel:#151515;--line:#393939;--hot-red:#f5f5f5;--deep-red:#555;--soft-red:#bdbdbd}
+body[data-theme="glass"]{--bg:#0a1525;--panel:#ffffff12;--line:#ffffff45;--hot-red:#8be9ff;--deep-red:#a78bfa;--soft-red:#ffd1f3;background:radial-gradient(ellipse at 20% 0%,#1c527a 0,transparent 40%),radial-gradient(ellipse at 90% 30%,#51265d 0,transparent 38%),linear-gradient(135deg,#070d19,#111827 55%,#091624)}
+body[data-theme="glass"] .toolbar,body[data-theme="glass"] .mixer-panel,body[data-theme="glass"] .game-modal-card,body[data-theme="glass"] .settings-panel{background:linear-gradient(135deg,#ffffff20,#ffffff08)!important;border-color:#ffffff55!important;box-shadow:0 12px 36px #0005,inset 0 1px 0 #ffffff40;backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%)}
+body[data-theme="glass"] button,body[data-theme="glass"] select,body[data-theme="glass"] input{background-color:#ffffff14;border-color:#ffffff55;color:#f8fbff;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+body[data-theme="blue"] .toolbar{background:linear-gradient(135deg,#062a48ee,#102f53ee)!important;border-color:#38bdf8!important}
+body[data-theme="black"] .toolbar{background:linear-gradient(135deg,#101010,#242424)!important;border-color:#888!important}
+@media(max-width:600px){.settings-anchor{top:6px;left:6px}.settings-toggle{padding:7px 9px;font-size:.75rem}.settings-panel{top:42px}}
+/* Apply the selected theme consistently across the whole site: table, group/period headers, games, info panels and mixer. */
+body[data-theme="red"]{background:radial-gradient(ellipse at 50% 18%,#3a0b19 0,#1b0710 48%,#080407 100%);--theme-surface:#260a13;--theme-surface2:#350d1b;--theme-border:#8c2440;--theme-glow:#ff304f}
+body[data-theme="blue"]{background:radial-gradient(ellipse at 50% 18%,#123b60 0,#071b30 48%,#030b15 100%);--theme-surface:#0b2743;--theme-surface2:#103554;--theme-border:#2477ad;--theme-glow:#38bdf8}
+body[data-theme="black"]{background:radial-gradient(ellipse at 50% 18%,#242424 0,#101010 48%,#000 100%);--theme-surface:#151515;--theme-surface2:#202020;--theme-border:#555;--theme-glow:#eee}
+body[data-theme="glass"]{--theme-surface:#ffffff12;--theme-surface2:#ffffff1c;--theme-border:#ffffff45;--theme-glow:#8be9ff}
+body[data-theme] .toolbar,
+body[data-theme] .info,
+body[data-theme] .shell-panel,
+body[data-theme] .atom-panel,
+body[data-theme] .atom-panels,
+body[data-theme] .mixer-panel,
+body[data-theme] .mixer-slot,
+body[data-theme] .mixer-catalog,
+body[data-theme] .mixer-catalog-head,
+body[data-theme] .game-modal-card,
+body[data-theme] .game-card,
+body[data-theme] .settings-panel,
+body[data-theme] .mixer-result,
+body[data-theme] .stats .pill{
+ background:var(--theme-surface)!important;border-color:var(--theme-border)!important;
+}
+body[data-theme] .group-header{color:var(--hot-red)!important;background:var(--theme-surface2)!important;border-color:color-mix(in srgb,var(--hot-red) 42%,transparent)!important;text-shadow:0 0 7px color-mix(in srgb,var(--hot-red) 55%,transparent)!important}
+body[data-theme] .group-header span.cas-name{color:var(--soft-red)!important}
+body[data-theme] .period-header{color:var(--soft-red)!important;background:var(--theme-surface2)!important;border-color:color-mix(in srgb,var(--hot-red) 42%,transparent)!important;text-shadow:0 0 7px color-mix(in srgb,var(--hot-red) 55%,transparent)!important}
+body[data-theme] .block-label{background:var(--theme-surface)!important;border-color:var(--theme-border)!important;color:var(--soft-red)!important}
+body[data-theme] .element{background:color-mix(in srgb,var(--theme-surface2) 86%,var(--edge))!important;border-color:color-mix(in srgb,var(--hot-red) 48%,var(--edge))!important}
+body[data-theme] .element .badge-z{color:var(--hot-red)!important;background:color-mix(in srgb,var(--hot-red) 18%,transparent)!important;border-color:color-mix(in srgb,var(--hot-red) 45%,transparent)!important;text-shadow:0 0 5px var(--hot-red)!important}
+body[data-theme] .element .badge-a{color:var(--soft-red)!important;background:color-mix(in srgb,var(--soft-red) 14%,transparent)!important;border-color:color-mix(in srgb,var(--soft-red) 42%,transparent)!important;text-shadow:0 0 5px var(--soft-red)!important}
+body[data-theme] .element .symbol{ text-shadow:0 0 5px #fff,0 0 13px var(--hot-red),0 0 22px color-mix(in srgb,var(--hot-red) 70%,transparent)!important}
+body[data-theme] .element .tile-config-row{color:var(--soft-red)!important;background:#0005!important}
+body[data-theme] .legend{color:var(--soft-red)!important}
+body[data-theme] .game-thumb{background:linear-gradient(135deg,var(--theme-surface2),color-mix(in srgb,var(--hot-red) 18%,var(--theme-surface)))!important;border-color:var(--theme-border)!important}
+body[data-theme] .game-card-title,body[data-theme] .game-card-foot,body[data-theme] .info h2,body[data-theme] .settings-heading{color:var(--soft-red)!important}
+body[data-theme] .game-card-desc,body[data-theme] .info p,body[data-theme] .mixer-help,body[data-theme] .mixer-visual-note{color:var(--muted)!important}
+body[data-theme] button,body[data-theme] select,body[data-theme] input{background:var(--theme-surface2);border-color:var(--theme-border);color:#f8fbff}
+body[data-theme] button:hover,body[data-theme] .game-card:hover{border-color:var(--hot-red)!important;box-shadow:0 0 14px color-mix(in srgb,var(--hot-red) 34%,transparent)!important}
+body[data-theme] .settings-toggle,body[data-theme] .settings-panel{background:var(--theme-surface)!important;border-color:var(--theme-border)!important}
+body[data-theme="glass"] .group-header,body[data-theme="glass"] .period-header,body[data-theme="glass"] .element,body[data-theme="glass"] .game-card,body[data-theme="glass"] .game-thumb,body[data-theme="glass"] .info,body[data-theme="glass"] .shell-panel,body[data-theme="glass"] .atom-panel,body[data-theme="glass"] .mixer-slot,body[data-theme="glass"] .mixer-catalog,body[data-theme="glass"] .mixer-result{backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);box-shadow:inset 0 1px 0 #ffffff30,0 8px 24px #0003!important}
+body[data-theme="glass"] .element{background:linear-gradient(145deg,#ffffff22,#ffffff08)!important;border-color:#ffffff4d!important}
+body[data-theme="glass"] .group-header,body[data-theme="glass"] .period-header{background:#ffffff12!important}
+body[data-theme="black"] .element{background:linear-gradient(145deg,#242424,#101010)!important;border-color:#666!important}
+body[data-theme="black"] .group-header,body[data-theme="black"] .period-header{background:#181818!important}
+
+
+/* Theme coverage for every game screen and all dynamically-created quiz controls */
+body[data-theme] .game-modal-card,
+body[data-theme] .game-modal-card .game-card,
+body[data-theme] .game-modal-card .game-card-content,
+body[data-theme] .game-modal-card .quiz-answers,
+body[data-theme] .game-modal-card .quiz-answer,
+body[data-theme] .game-modal-card .answer-btn,
+body[data-theme] .game-modal-card .question-card,
+body[data-theme] .game-modal-card .question-box,
+body[data-theme] .game-modal-card .game-panel,
+body[data-theme] .game-modal-card .game-content,
+body[data-theme] .game-modal-card .game-screen,
+body[data-theme] .game-modal-card .result-card,
+body[data-theme] .game-modal-card .score-box,
+body[data-theme] .game-modal-card .progress,
+body[data-theme] .game-modal-card .progress-bar,
+body[data-theme] .game-modal-card .game-feedback,
+body[data-theme] .game-modal-card .game-option,
+body[data-theme] .game-modal-card .option,
+body[data-theme] .game-modal-card .quiz-option,
+body[data-theme] .game-modal-card .game-stat {
+ background-color:var(--theme-surface)!important;
+ border-color:var(--theme-border)!important;
+ color:#f8fbff!important;
+}
+body[data-theme] .game-modal-card h1,
+body[data-theme] .game-modal-card h2,
+body[data-theme] .game-modal-card h3,
+body[data-theme] .game-modal-card h4,
+body[data-theme] .game-modal-card p,
+body[data-theme] .game-modal-card label,
+body[data-theme] .game-modal-card .question,
+body[data-theme] .game-modal-card .score,
+body[data-theme] .game-modal-card .game-status {color:var(--soft-red)!important}
+body[data-theme] .game-modal-card button,
+body[data-theme] .game-modal-card [role="button"] {
+ background:var(--theme-surface2)!important;
+ border-color:var(--theme-border)!important;
+ color:#fff!important;
+}
+body[data-theme] .game-modal-card button:hover,
+body[data-theme] .game-modal-card [role="button"]:hover,
+body[data-theme] .game-modal-card button:focus-visible {
+ border-color:var(--hot-red)!important;
+ box-shadow:0 0 14px color-mix(in srgb,var(--hot-red) 38%,transparent)!important;
+}
+body[data-theme="red"] .game-modal-card .game-card,
+body[data-theme="red"] .game-modal-card .question-card,
+body[data-theme="red"] .game-modal-card .question-box,
+body[data-theme="red"] .game-modal-card .game-panel,
+body[data-theme="red"] .game-modal-card .game-content,
+body[data-theme="red"] .game-modal-card .game-screen,
+body[data-theme="red"] .game-modal-card .result-card {background:linear-gradient(145deg,#350d1b,#1b0710)!important}
+body[data-theme="blue"] .game-modal-card .game-card,
+body[data-theme="blue"] .game-modal-card .question-card,
+body[data-theme="blue"] .game-modal-card .question-box,
+body[data-theme="blue"] .game-modal-card .game-panel,
+body[data-theme="blue"] .game-modal-card .game-content,
+body[data-theme="blue"] .game-modal-card .game-screen,
+body[data-theme="blue"] .game-modal-card .result-card {background:linear-gradient(145deg,#103554,#071b30)!important}
+body[data-theme="black"] .game-modal-card .game-card,
+body[data-theme="black"] .game-modal-card .question-card,
+body[data-theme="black"] .game-modal-card .question-box,
+body[data-theme="black"] .game-modal-card .game-panel,
+body[data-theme="black"] .game-modal-card .game-content,
+body[data-theme="black"] .game-modal-card .game-screen,
+body[data-theme="black"] .game-modal-card .result-card {background:linear-gradient(145deg,#242424,#101010)!important}
+/* Liquid Glass: blur the background through all glass panels, including games */
+body[data-theme="glass"] .game-modal {background:#02081766!important;backdrop-filter:blur(12px) saturate(140%);-webkit-backdrop-filter:blur(12px) saturate(140%)}
+body[data-theme="glass"] .game-modal-card,
+body[data-theme="glass"] .game-modal-card .game-card,
+body[data-theme="glass"] .game-modal-card .question-card,
+body[data-theme="glass"] .game-modal-card .question-box,
+body[data-theme="glass"] .game-modal-card .game-panel,
+body[data-theme="glass"] .game-modal-card .game-content,
+body[data-theme="glass"] .game-modal-card .game-screen,
+body[data-theme="glass"] .game-modal-card .result-card,
+body[data-theme="glass"] .game-modal-card .score-box,
+body[data-theme="glass"] .game-modal-card .quiz-answers,
+body[data-theme="glass"] .game-modal-card .quiz-answer,
+body[data-theme="glass"] .game-modal-card .answer-btn,
+body[data-theme="glass"] .game-modal-card button,
+body[data-theme="glass"] .game-modal-card [role="button"] {
+ background:linear-gradient(135deg,#ffffff25,#ffffff09)!important;
+ border-color:#ffffff55!important;
+ backdrop-filter:blur(20px) saturate(170%);
+ -webkit-backdrop-filter:blur(20px) saturate(170%);
+ box-shadow:inset 0 1px 0 #ffffff35,0 8px 24px #0003!important;
+}
+
+
+/* ===== v4 improvements ===== */
+@keyframes titleFlicker{0%,90%,100%{opacity:1}92%{opacity:.86}94%{opacity:1}96%{opacity:.9}}
+@keyframes modalPop{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:none}}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:hidden}
+body{overflow-x:hidden;min-height:100vh}
+@supports(height:100dvh){body{min-height:100dvh}}
+html:has(body.modal-open),html:has(body.quiz-mode){overflow:hidden}
+button,select,input{touch-action:manipulation}
+:focus-visible{outline:3px solid var(--hot-red);outline-offset:2px}
+.element:focus-visible{outline:2px solid #fff}
+header{padding-top:calc(76px + env(safe-area-inset-top,0px))}
+main{padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));padding-bottom:calc(30px + env(safe-area-inset-bottom,0px))}
+.settings-anchor{top:max(12px,env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px))}
+.neon-toggle{top:max(14px,env(safe-area-inset-top,0px))!important;right:max(14px,env(safe-area-inset-right,0px))!important;white-space:nowrap}
+.element .tile-config-row,.element .tile-name-row{display:block}
+.element .tile-config-row{white-space:nowrap;overflow:hidden}
+.element .tile-config-row.long{font-size:.44rem;letter-spacing:-.04em}
+.game-card-title,.game-card-desc,.game-card-foot{display:block}
+.game-modal-card,body.quiz-mode #quiz{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+@supports(height:100dvh){.game-modal-card{max-height:calc(100dvh - 30px)!important}body.quiz-mode #quiz{max-height:calc(100dvh - 24px)!important}}
+.legend span{white-space:nowrap}
+.reset{min-height:44px}
+button,select,input{min-height:40px}
+.theme-choice,.slot-remove,.settings-close,.modal-close{min-height:36px}
+@media(pointer:coarse){select,input,.mixer-slot select,.mixer-catalog-search{font-size:16px!important}button{min-height:44px}.modal-close{min-width:44px;min-height:44px}}
+@media(max-width:700px){
+ .toolbar{padding:12px;gap:10px}.control{min-width:calc(50% - 5px);flex:1 1 calc(50% - 5px)}.control select,.control input{width:100%}.reset{margin-left:0;flex:1 1 100%}
+ .grid-container{grid-template-columns:30px repeat(18,minmax(46px,1fr));min-width:0;gap:3px}
+ .series-wrap{grid-template-columns:repeat(18,minmax(46px,1fr));gap:3px}
+ .element{min-height:62px;padding:3px}.series-wrap .element{min-height:62px}
+ .element .tile-config-row,.element .block-badge,.element .badge-a{display:none}
+ .element .symbol{font-size:1.05rem}.element .name{font-size:.5rem}.element .badge-z{font-size:.5rem}
+ .group-header{font-size:.62rem}.group-header span.cas-name{display:none}.period-header{font-size:.72rem}
+ .table-wrap{overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+ .info{grid-template-columns:1fr;text-align:center}.info-symbol{margin:0 auto}.stats{justify-content:center}.atom-panels{grid-template-columns:1fr}
+ .quiz-launch,.mixer-launch{font-size:1rem;padding:15px 14px}
+}
+@media(max-width:480px){.neon-toggle{font-size:.74rem;padding:8px 9px}.settings-toggle{font-size:.74rem;padding:8px 9px}header{padding-left:10px;padding-right:10px}.quiz-answers{grid-template-columns:1fr!important}body.quiz-mode #quiz{padding:16px!important}.quiz-question{font-size:1.02rem}}
+@media(max-width:360px){#settingsButtonLabel{display:none}}
+@media(max-height:480px) and (orientation:landscape){header{padding-top:56px}.game-modal-card{padding:14px}body.quiz-mode #quiz{padding:14px!important}.quiz-question{margin:10px 0}}
+/* Per-theme tokens for buttons and game window (quiz window previously stayed red in every theme) */
+body[data-theme="red"]{--btn1:#c70233;--btn2:#6a0a20;--q-bg:radial-gradient(ellipse at 80% 10%,#a10230 0,#380718 50%,#1a030d 100%);--q-card:#4a0c20;--q-card2:#300814;--q-line:#c70233;--q-hot:#ff304f}
+body[data-theme="blue"]{--btn1:#0284c7;--btn2:#0c4a6e;--q-bg:radial-gradient(ellipse at 80% 10%,#0b6aa5 0,#08304f 50%,#041423 100%);--q-card:#0d4268;--q-card2:#082a45;--q-line:#2477ad;--q-hot:#38bdf8}
+body[data-theme="black"]{--btn1:#444;--btn2:#1a1a1a;--q-bg:radial-gradient(ellipse at 80% 10%,#363636 0,#161616 50%,#050505 100%);--q-card:#2a2a2a;--q-card2:#171717;--q-line:#666;--q-hot:#e5e5e5}
+body[data-theme="glass"]{--btn1:#ffffff30;--btn2:#ffffff10;--q-bg:linear-gradient(135deg,#ffffff2b,#ffffff0d);--q-card:#ffffff22;--q-card2:#ffffff0d;--q-line:#ffffff66;--q-hot:#8be9ff}
+body[data-theme] .quiz-launch,body[data-theme] .mixer-launch,body[data-theme] .neon-toggle,body[data-theme] .quiz-primary{background:linear-gradient(110deg,var(--btn1),var(--btn2));border-color:var(--hot-red);color:#fff}
+body[data-theme] .reset{background:#f4f4f6;color:#1b1b1f;border-color:#fff}
+body[data-theme] body.quiz-mode #quiz,body[data-theme].quiz-mode #quiz{background:var(--q-bg)!important;border-color:var(--q-hot)!important;box-shadow:0 0 45px color-mix(in srgb,var(--q-hot) 40%,transparent),0 20px 60px #0008!important}
+body[data-theme="glass"].quiz-mode #quiz{backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%)}
+body[data-theme] #quiz h2{color:#fff;text-shadow:0 0 12px var(--q-hot)}
+body[data-theme] #quiz .quiz-sub,body[data-theme] #quiz .quiz-feedback{color:var(--soft-red)}
+body[data-theme] #quiz .quiz-badge{background:var(--q-card2);border-color:var(--q-line);color:#fff}
+body[data-theme] #quiz .quiz-answer:not(.correct):not(.wrong){background:linear-gradient(135deg,var(--q-card),var(--q-card2));border-color:var(--q-line);color:#fff}
+body[data-theme] #quiz .quiz-answer:hover:not(:disabled){border-color:var(--q-hot);background:var(--q-card);box-shadow:0 0 16px color-mix(in srgb,var(--q-hot) 40%,transparent)}
+body[data-theme] #quiz .quiz-progress{background:var(--q-card2);border-color:var(--q-line)}
+body[data-theme] #quiz .quiz-progress span{background:linear-gradient(90deg,var(--q-hot),var(--q-line));box-shadow:0 0 12px var(--q-hot)}
+body[data-theme] .return-table-button,body[data-theme] #quiz #quizRestart{background:var(--q-card2);border-color:var(--q-hot);color:#fff}
+body[data-theme] .mixer-launch{box-shadow:0 0 18px color-mix(in srgb,var(--hot-red) 25%,transparent)}
+body[data-theme="glass"] .element,body[data-theme="glass"] .group-header,body[data-theme="glass"] .period-header,body[data-theme="glass"] .game-thumb{backdrop-filter:none;-webkit-backdrop-filter:none}
+body[data-theme="glass"] .quiz-launch,body[data-theme="glass"] .mixer-launch,body[data-theme="glass"] .neon-toggle{backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Subtle, adjustable neon with a readable red theme. */
+:root{--neon-alpha:22%}
+.neon-settings{display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid var(--theme-border,#35536c);border-radius:12px;background:#0002}
+.neon-settings label{margin:0!important}.neon-range-row{display:flex;align-items:center;gap:10px}
+.neon-range-row input[type="range"]{flex:1;min-width:0;width:100%;padding:0;accent-color:var(--hot-red);min-height:28px;background:transparent;border:0}
+.neon-range-row output{min-width:42px;text-align:right;color:#fff;font-weight:800;font-size:.82rem}
+.neon-off-button{width:100%;padding:8px 10px!important;background:#202733!important;border:1px solid #64748b!important;color:#f8fafc!important;box-shadow:none!important;text-shadow:none!important}
+body.neon-disabled *,body.neon-disabled *::before,body.neon-disabled *::after{text-shadow:none!important;animation:none!important}
+body.neon-disabled .element,body.neon-disabled .info,body.neon-disabled .info-symbol,body.neon-disabled .toolbar,body.neon-disabled .game-modal-card,body.neon-disabled .game-card,body.neon-disabled button,body.neon-disabled .mixer-panel{box-shadow:0 2px 8px #0004!important}
+body:not(.neon-disabled) h1{ text-shadow:0 0 5px color-mix(in srgb,#fff var(--neon-alpha),transparent)!important;animation:none!important}
+body:not(.neon-disabled) .element .symbol{text-shadow:0 0 4px color-mix(in srgb,#fff var(--neon-alpha),transparent),0 0 9px color-mix(in srgb,var(--edge) var(--neon-alpha),transparent)!important}
+body:not(.neon-disabled) .element:hover,body:not(.neon-disabled) .element:focus-visible,body:not(.neon-disabled) .element.match{box-shadow:0 3px 12px color-mix(in srgb,var(--edge) var(--neon-alpha),transparent)!important}
+body[data-theme="red"] .group-header,body[data-theme="red"] .period-header{color:#f8fafc!important;text-shadow:none!important}
+body[data-theme="red"] .block-label,body[data-theme="red"] .game-card-title,body[data-theme="red"] .game-card-foot,body[data-theme="red"] .info h2,body[data-theme="red"] .settings-heading{color:#fff!important}
+body[data-theme="red"] .element .badge-z{color:#fecdd3!important;text-shadow:none!important}
+body[data-theme="red"] .element .tile-config-row{color:#f8fafc!important}
+
+
+/* NORMAL / DEFAULT: a clean, bright theme that keeps element-family colours visible everywhere. */
+body[data-theme="default"]{color:#172033;background:#f1f5f9!important;--bg:#f1f5f9;--panel:#ffffff;--line:#cbd5e1;--hot-red:#2563eb;--deep-red:#1d4ed8;--soft-red:#334155;--theme-surface:#ffffff;--theme-surface2:#eaf0f7;--theme-border:#cbd5e1;--theme-glow:#2563eb;--btn1:#2563eb;--btn2:#1d4ed8;--q-bg:linear-gradient(135deg,#f8fafc,#e2e8f0);--q-card:#fff;--q-card2:#f1f5f9;--q-line:#cbd5e1;--q-hot:#2563eb}
+body[data-theme="default"] header,body[data-theme="default"] main,body[data-theme="default"] .toolbar,body[data-theme="default"] .info,body[data-theme="default"] .shell-panel,body[data-theme="default"] .atom-panel,body[data-theme="default"] .atom-panels,body[data-theme="default"] .mixer-panel,body[data-theme="default"] .mixer-slot,body[data-theme="default"] .mixer-catalog,body[data-theme="default"] .mixer-catalog-head,body[data-theme="default"] .game-modal-card,body[data-theme="default"] .game-card,body[data-theme="default"] .settings-panel,body[data-theme="default"] .mixer-result,body[data-theme="default"] .stats .pill{color:#172033!important;background:#fff!important;border-color:#cbd5e1!important}
+body[data-theme="default"] h1,body[data-theme="default"] h2,body[data-theme="default"] h3,body[data-theme="default"] p,body[data-theme="default"] label,body[data-theme="default"] .game-card-title,body[data-theme="default"] .game-card-foot,body[data-theme="default"] .info h2,body[data-theme="default"] .settings-heading,body[data-theme="default"] .settings-panel label,body[data-theme="default"] .settings-theme-title,body[data-theme="default"] .legend,body[data-theme="default"] .mixer-help,body[data-theme="default"] .mixer-visual-note{color:#172033!important;text-shadow:none!important}
+body[data-theme="default"] button,body[data-theme="default"] select,body[data-theme="default"] input,body[data-theme="default"] textarea{background:#fff!important;color:#172033!important;border-color:#cbd5e1!important}
+body[data-theme="default"] .settings-toggle,body[data-theme="default"] .neon-toggle,body[data-theme="default"] .quiz-launch,body[data-theme="default"] .mixer-launch{background:#1d4ed8!important;color:#fff!important;border-color:#60a5fa!important}
+body[data-theme="default"] .group-header,body[data-theme="default"] .period-header{background:#e2e8f0!important;color:#1e293b!important;border-color:#94a3b8!important;text-shadow:none!important}
+body[data-theme="default"] .block-label{background:#e2e8f0!important;color:#334155!important;border-color:#cbd5e1!important}
+body[data-theme="default"] .element{color:#172033!important;background:color-mix(in srgb,var(--edge) 15%,white)!important;border-color:var(--edge)!important;box-shadow:0 1px 3px #0f172a18!important}
+body[data-theme="default"] .element .symbol{color:#0f172a!important;text-shadow:none!important}
+body[data-theme="default"] .element .badge-z,body[data-theme="default"] .element .badge-a{color:#334155!important;text-shadow:none!important}
+body[data-theme="default"] .element .tile-config-row{color:#334155!important;background:#ffffffb8!important}
+body[data-theme="default"] .game-thumb{background:#e2e8f0!important;border-color:#cbd5e1!important}
+body[data-theme="default"] .game-modal-card .game-card,body[data-theme="default"] .game-modal-card .question-card,body[data-theme="default"] .game-modal-card .question-box,body[data-theme="default"] .game-modal-card .game-panel,body[data-theme="default"] .game-modal-card .game-content,body[data-theme="default"] .game-modal-card .game-screen,body[data-theme="default"] .game-modal-card .result-card,body[data-theme="default"] .game-modal-card .score-box,body[data-theme="default"] .game-modal-card .quiz-answers,body[data-theme="default"] .game-modal-card .quiz-answer,body[data-theme="default"] .game-modal-card .answer-btn,body[data-theme="default"] .game-modal-card button{background:#f8fafc!important;color:#172033!important;border-color:#cbd5e1!important}
+body[data-theme="default"] .game-modal-card h1,body[data-theme="default"] .game-modal-card h2,body[data-theme="default"] .game-modal-card h3,body[data-theme="default"] .game-modal-card p,body[data-theme="default"] .game-modal-card label{color:#172033!important}
+/* One global neon control: all decorative text and panel glows use the same intensity. */
+:root{--neon-alpha:22%;--neon-blur:4px;--neon-shadow:0 0 4px color-mix(in srgb,var(--hot-red,#ff304f) var(--neon-alpha),transparent)}
+body:not(.neon-disabled) h1,body:not(.neon-disabled) .creator-name,body:not(.neon-disabled) .creator-credit,body:not(.neon-disabled) .element .symbol,body:not(.neon-disabled) .element .badge-z,body:not(.neon-disabled) .element .badge-a,body:not(.neon-disabled) .group-header,body:not(.neon-disabled) .period-header,body:not(.neon-disabled) .settings-toggle,body:not(.neon-disabled) .neon-toggle,body:not(.neon-disabled) .quiz-launch,body:not(.neon-disabled) .mixer-launch,body:not(.neon-disabled) .game-card-title,body:not(.neon-disabled) .info h2{ text-shadow:0 0 var(--neon-blur) color-mix(in srgb,var(--hot-red,#ff304f) var(--neon-alpha),transparent)!important }
+body:not(.neon-disabled) .element:hover,body:not(.neon-disabled) .element:focus-visible,body:not(.neon-disabled) .element.match,body:not(.neon-disabled) .toolbar,body:not(.neon-disabled) .info,body:not(.neon-disabled) .game-card,body:not(.neon-disabled) .game-modal-card,body:not(.neon-disabled) .mixer-panel,body:not(.neon-disabled) .settings-panel,body:not(.neon-disabled) .settings-toggle,body:not(.neon-disabled) button:hover{box-shadow:0 0 var(--neon-blur) color-mix(in srgb,var(--hot-red,#ff304f) var(--neon-alpha),transparent)!important}
+body.neon-disabled *,body.neon-disabled *::before,body.neon-disabled *::after{ text-shadow:none!important;box-shadow:none!important;filter:none!important;animation:none!important }
+body[data-theme="default"]:not(.neon-disabled) .element:hover,body[data-theme="default"]:not(.neon-disabled) .element:focus-visible,body[data-theme="default"]:not(.neon-disabled) .element.match{box-shadow:0 0 var(--neon-blur) color-mix(in srgb,var(--hot-red) var(--neon-alpha),transparent)!important}
+
+
+/* DEFAULT theme: black background with soft charcoal surfaces and clear white text. */
+body[data-theme="default"]{
+ color:#f1f1f1!important;background:#080808!important;
+ --bg:#080808;--panel:#151515;--line:#393939;--hot-red:#f2f2f2;--deep-red:#777777;--soft-red:#d0d0d0;
+ --theme-surface:#151515;--theme-surface2:#202020;--theme-border:#414141;--theme-glow:#bdbdbd;
+ --btn1:#252525;--btn2:#111111;--q-bg:linear-gradient(135deg,#181818,#101010);--q-card:#171717;--q-card2:#222222;--q-line:#414141;--q-hot:#dedede;
+}
+body[data-theme="default"] header,body[data-theme="default"] main,body[data-theme="default"] .toolbar,body[data-theme="default"] .info,body[data-theme="default"] .shell-panel,body[data-theme="default"] .atom-panel,body[data-theme="default"] .atom-panels,body[data-theme="default"] .mixer-panel,body[data-theme="default"] .mixer-slot,body[data-theme="default"] .mixer-catalog,body[data-theme="default"] .mixer-catalog-head,body[data-theme="default"] .game-modal-card,body[data-theme="default"] .game-card,body[data-theme="default"] .settings-panel,body[data-theme="default"] .mixer-result,body[data-theme="default"] .stats .pill{
+ color:#f1f1f1!important;background:#151515!important;border-color:#414141!important;
+}
+body[data-theme="default"] button,body[data-theme="default"] select,body[data-theme="default"] input,body[data-theme="default"] textarea{background:#222!important;color:#f1f1f1!important;border-color:#494949!important}
+body[data-theme="default"] .settings-toggle,body[data-theme="default"] .neon-toggle,body[data-theme="default"] .quiz-launch,body[data-theme="default"] .mixer-launch{background:#303030!important;color:#fff!important;border-color:#666!important}
+body[data-theme="default"] .group-header,body[data-theme="default"] .period-header,body[data-theme="default"] .block-label{background:#202020!important;color:#f1f1f1!important;border-color:#505050!important;text-shadow:none!important}
+body[data-theme="default"] .element{color:#f2f2f2!important;background:color-mix(in srgb,var(--edge) 23%,#171717)!important;border-color:var(--edge)!important;box-shadow:0 1px 4px #0008!important}
+body[data-theme="default"] .element .symbol{color:#fff!important;text-shadow:none!important}
+body[data-theme="default"] .element .tile-config-row{color:#e0e0e0!important;background:#111111d9!important}
+body[data-theme="default"] .game-thumb{background:#202020!important;border-color:#414141!important}
+body[data-theme="default"] .game-modal-card .game-card,body[data-theme="default"] .game-modal-card .question-card,body[data-theme="default"] .game-modal-card .question-box,body[data-theme="default"] .game-modal-card .game-panel,body[data-theme="default"] .game-modal-card .game-content,body[data-theme="default"] .game-modal-card .game-screen,body[data-theme="default"] .game-modal-card .result-card,body[data-theme="default"] .game-modal-card .score-box,body[data-theme="default"] .game-modal-card .quiz-answers,body[data-theme="default"] .game-modal-card .quiz-answer,body[data-theme="default"] .game-modal-card .answer-btn,body[data-theme="default"] .game-modal-card button{background:#202020!important;color:#f1f1f1!important;border-color:#414141!important}
+body[data-theme="default"] h1,body[data-theme="default"] h2,body[data-theme="default"] h3,body[data-theme="default"] p,body[data-theme="default"] label,body[data-theme="default"] .game-card-title,body[data-theme="default"] .game-card-foot,body[data-theme="default"] .info h2,body[data-theme="default"] .settings-heading,body[data-theme="default"] .settings-panel label,body[data-theme="default"] .settings-theme-title,body[data-theme="default"] .legend,body[data-theme="default"] .mixer-help,body[data-theme="default"] .mixer-visual-note{color:#f1f1f1!important;text-shadow:none!important}
+body[data-theme="default"] .element .badge-z,body[data-theme="default"] .element .badge-a{color:#d5d5d5!important;text-shadow:none!important}
+
+
+</style>
+</head>
+<body>
+<div class="settings-anchor">
+ <button id="settingsToggle" class="settings-toggle" type="button" aria-expanded="false" aria-controls="settingsPanel">⚙️ <span id="settingsButtonLabel">Paramètres</span></button>
+ <section id="settingsPanel" class="settings-panel" hidden aria-label="Settings">
+  <div class="settings-heading"><strong id="settingsTitle">⚙️ Paramètres</strong><button id="settingsClose" class="settings-close" type="button" aria-label="Close settings">×</button></div>
+  <label for="siteLanguage" id="languageLabel">Langue</label>
+  <select id="siteLanguage" aria-label="Choisir la langue"><option value="fr" selected>Français</option><option value="en">English</option><option value="ar">العربية</option></select>
+  <div class="settings-theme-title" id="themeLabel">Thème personnalisé</div>
+  <div class="neon-settings">
+   <label for="neonLevel" id="neonLevelLabel">Intensité du néon</label>
+   <div class="neon-range-row"><input id="neonLevel" type="range" min="1" max="100" value="22" aria-label="Neon intensity"><output id="neonValue" for="neonLevel">22%</output></div>
+   <button type="button" id="neonOff" class="neon-off-button" aria-pressed="false">Éteindre le néon</button>
+  </div>
+  <div class="theme-options">
+   <button type="button" class="theme-choice" data-theme-choice="default"><span class="theme-dot default-dot"></span><span data-theme-name="default">Normal / Default</span></button>
+   <button type="button" class="theme-choice" data-theme-choice="red"><span class="theme-dot red-dot"></span><span data-theme-name="red">Rouge</span></button>
+   <button type="button" class="theme-choice" data-theme-choice="blue"><span class="theme-dot blue-dot"></span><span data-theme-name="blue">Bleu</span></button>
+   <button type="button" class="theme-choice" data-theme-choice="black"><span class="theme-dot black-dot"></span><span data-theme-name="black">Noir</span></button>
+   <button type="button" class="theme-choice" data-theme-choice="glass"><span class="theme-dot glass-dot"></span><span data-theme-name="glass">Liquid Glass</span></button>
+  </div>
+ </section>
+</div>
+<header>
+ <p class="creator-name">✦ STEVEN EMAD · CRÉATEUR ✦</p>
+ <h1>Tableau Périodique Interactif</h1>
+ <p>Sciences - 1ère Année Préparatoire · Leçons 1 & 2</p>
+ <p class="creator-credit">Créé par STEVEN EMAD</p>
+</header>
+<button class="neon-toggle" id="neonToggle" type="button">🎮 8 Jeux de Chimie</button>
+<main>
+<section class="toolbar" aria-label="Filtres">
+ <div class="control"><label for="search">Recherche Element</label><input id="search" placeholder="Nom, symbole, Z..."></div>
+ <div class="control"><label for="state">État Physique</label><select id="state"><option value="all">Tous les états</option><option value="Solide">Solide</option><option value="Liquide">Liquide</option><option value="Gaz">Gaz</option></select></div>
+ <div class="control"><label for="family">Famille</label><select id="family"><option value="all">Toutes les familles</option><option value="alkali">Alcalins</option><option value="alkaline">Alcalino-terreux</option><option value="transition">Métaux de transition</option><option value="nonmetal">Non-métaux</option><option value="halogen">Halogènes</option><option value="noble">Gaz nobles</option><option value="post">Métaux pauvres</option><option value="metalloid">Métalloïdes</option><option value="lanth">Lanthanides</option><option value="act">Actinides</option></select></div>
+ <div class="control"><label for="blockFilter">Blocs (Sous-couches)</label><select id="blockFilter"><option value="all">Tous les blocs (s, p, d, f)</option><option value="s">Bloc s</option><option value="p">Bloc p</option><option value="d">Bloc d</option><option value="f">Bloc f</option></select></div>
+ <button id="reset" class="reset">Réinitialiser</button>
+</section>
+
+<div class="legend" id="legend"></div>
+
+<div class="table-wrap">
+ <div class="grid-container" id="gridContainer">
+  <!-- Group Headers & Period Headers will be auto-generated with elements -->
+ </div>
+</div>
+
+<div class="table-zoom-controls" aria-label="Contrôle de Zoom">
+ <button id="zoomOut" type="button">−</button>
+ <span id="zoomValue">100%</span>
+ <button id="zoomIn" type="button">＋</button>
+ <button id="zoomReset" type="button">100% ↺</button>
+</div>
+
+<button class="quiz-launch" id="quizLaunchButton" type="button">🎯 Lancer la Galerie des 8 Jeux Interactifs (Leçons 1 & 2)</button>
+
+<button class="mixer-launch" id="mixerLaunch" type="button">🧪 Mixer de chimie</button>
+<section class="mixer-panel hidden" id="mixerPanel" aria-label="Chemistry mixer">
+ <h2>🧪 Mixer de chimie</h2>
+ <p class="mixer-help" id="mixerHelp">Commencez avec deux éléments côte à côte. Cliquez sur « Ajouter un élément » pour en ajouter jusqu’à six, puis choisissez le nombre d’atomes de chacun.</p>
+ <div class="mixer-slots" id="mixerSlots"></div>
+ <div class="mixer-actions">
+  <button class="mixer-add" id="mixAddElement" type="button">＋ Ajouter un élément</button>
+  <button class="quiz-primary" id="mixCheck" type="button">Vérifier la combinaison</button>
+  <button id="mixExample" type="button">Exemple : eau</button>
+  <button id="mixCatalogToggle" type="button">📚 Catalogue des composés</button>
+  <button id="mixClose" type="button">Fermer</button>
+ </div>
+ <div class="mixer-result" id="mixerResult" aria-live="polite">Choisissez les éléments puis cliquez sur « Vérifier la combinaison ».</div>
+ <section class="mixer-catalog hidden" id="mixerCatalog" aria-label="Catalogue des combinaisons chimiques">
+  <div class="mixer-catalog-head"><b id="catalogTitle">📚 Catalogue de composés courants</b><p id="catalogDescription">Les 118 éléments sont disponibles dans le mélangeur. Ce catalogue présente des exemples éducatifs de composés contenant deux éléments ou plus. Il ne peut pas recenser tous les composés et toutes les réactions chimiques ; une formule absente de la liste n’est pas nécessairement impossible.</p>
+   <input class="mixer-catalog-search" id="mixCatalogSearch" type="search" placeholder="Rechercher par formule, élément ou composé…" aria-label="Rechercher dans le catalogue">
+  </div>
+  <div class="mixer-catalog-scroll"><table><thead><tr><th>Formule</th><th>Nom du composé</th><th>Éléments et nombre d’atomes</th></tr></thead><tbody id="mixCatalogBody"></tbody></table></div>
+ </section>
+</section>
+
+
+<!-- Centered Selection Modal With 8 Games in 1 Vertical Column -->
+<div class="game-modal hidden" id="gameModal" role="dialog" aria-modal="true" aria-labelledby="gameModalTitle">
+ <div class="game-modal-card">
+ <button class="modal-close" id="closeGameModal" type="button" aria-label="Fermer">×</button>
+ <div class="modal-kicker">✦ GALERIE DE 8 JEUX DE CHIMIE ✦</div>
+ <h2 id="gameModalTitle">Jeux &amp; Révisions - Sciences 1ère Prep</h2>
+ <p class="modal-desc">Questions de révision (Leçon 1 : Structure de l’atome et Leçon 2 : Tableau périodique).</p>
+ <div class="game-gallery" id="gameGallery">
+ <button class="game-card" data-game="subatomic" data-title="1. Particules Subatomiques" type="button">
+ <span class="game-thumb"><span class="mini-elements"><span>p⁺ n⁰</span><span>e⁻ −</span></span><span class="big-icon">⚛️</span></span>
+ <span class="game-card-content"><span class="game-card-title">1. Particules Subatomiques</span><span class="game-card-desc">Protons, neutrons, électrons, charges et masse atomique (Leçon 1).</span><span class="game-card-foot">Jouer au Jeu ↗</span></span>
+ </button>
+ <button class="game-card" data-game="electron_config" data-title="2. Configuration Électronique" type="button">
+ <span class="game-thumb"><span class="mini-elements"><span>K L M N</span><span>2.8.1</span></span><span class="big-icon">⚡</span></span>
+ <span class="game-card-content"><span class="game-card-title">2. Couches Électroniques</span><span class="game-card-desc">Distribution des électrons dans les niveaux K, L, M, N (Leçon 1).</span><span class="game-card-foot">Jouer au Jeu ↗</span></span>
+ </button>
+ <button class="game-card" data-game="latin_symbols" data-title="3. Symboles Latins des Éléments" type="button">
+ <span class="game-thumb"><span class="mini-elements"><span>Na K</span><span>Fe Cu</span></span><span class="big-icon">🔤</span></span>
+ <span class="game-card-content"><span class="game-card-title">3. Symboles & Noms Latins</span><span class="game-card-desc">Natrium (Na), Kalium (K), Ferrum (Fe) et règles écrites (Leçon 1).</span><span class="game-card-foot">Jouer au Jeu ↗</span></span>
+ </button>
+ <button class="game-card" data-game="mass_number" data-title="4. Nombre Atomique & Massique" type="button">
+ <span class="game-thumb"><span class="mini-elements"><span>Z = p⁺</span><span>A = p+n</span></span><span class="big-icon">🧮</span></span>
+ <span class="game-card-content"><span class="game-card-title">4. Calculs Z & A</span><span class="game-card-desc">Calcul du nombre de neutrons, nombre atomique (Z) et massique (A).</span><span class="game-card-foot">Jouer au Jeu ↗</span></span>
+ </button>
+ <button class="game-card" data-game="periodic_trends" data-title="5. Classification Périodique" type="button">
+ <span class="game-thumb"><span class="mini-elements"><span>Ordre Z</span><span>Périodes</span></span><span class="big-icon">🧪</span></span>
+ <span class="game-card-content"><span class="game-card-title">5. Tableau Périodique Modern</span><span class="game-card-desc">Rangement croissant selon Z et remplissage des sous-couches (Leçon 2).</span><span class="game-card-foot">Jouer au Jeu ↗</span></span>
+ </button>
+ <button class="game-card" data-game="groups_periods" data-title="6. Groupes & Périodes" type="button">
+ <span class="game-thumb"><span class="mini-elements"><span>7 Périodes</span><span>18 Groupes</span></span><span class="big-icon">📐</span></span>
+ <span class="game-card-content"><span class="game-card-title">6. Localisation des Éléments</span><span class="game-card-desc">Déterminer la période et le groupe à partir de la configuration (Leçon 2).</span><span class="game-card-foot">Jouer au Jeu ↗</span></span>
+ </button>
+ <button class="game-card" data-game="chemical_families" data-title="7. Familles Chimiques" type="button">
+ <span class="game-thumb"><span class="mini-elements"><span>Alcalins</span><span>Halogènes</span></span><span class="big-icon">🧬</span></span>
+ <span class="game-card-content"><span class="game-card-title">7. Familles & Propriétés</span><span class="game-card-desc">Métaux alcalins (1A), Halogènes (17) et Gaz Inertes (18) (Leçon 2).</span><span class="game-card-foot">Jouer au Jeu ↗</span></span>
+ </button>
+ <button class="game-card" data-game="october_challenge" data-title="8. Grand Quiz Révision Octobre" type="button">
+ <span class="game-thumb"><span class="mini-elements"><span>Quiz</span><span>Prep 1</span></span><span class="big-icon">🏆</span></span>
+ <span class="game-card-content"><span class="game-card-title">8. Challenge Octobre Global</span><span class="game-card-desc">Évaluation complète sur l’ensemble des leçons 1 et 2.</span><span class="game-card-foot">Jouer au Jeu ↗</span></span>
+ </button>
+ </div>
+ </div>
+</div>
+
+<!-- Centered Active Quiz Window -->
+<section class="quiz" id="quiz" role="dialog" aria-modal="true" aria-labelledby="activeGameTitle">
+ <div class="quiz-head">
+ <h2 id="activeGameTitle">🎮 Mode Quiz</h2>
+ <div class="quiz-meta"><span class="quiz-badge" id="quizScore">⭐ Score: 0</span><span class="quiz-badge" id="quizRound">Question 1</span></div>
+ </div>
+ <p class="quiz-sub" id="quizCategoryLabel">Sciences - 1ère Préparatoire</p>
+ <div class="quiz-progress"><span id="quizProgress"></span></div>
+ <div class="quiz-question" id="quizQuestion">Prêt pour la question ?</div>
+ <div class="quiz-answers" id="quizAnswers"></div>
+ <div class="quiz-feedback" id="quizFeedback" aria-live="polite">Choisissez la bonne réponse ci-dessous.</div>
+ <div class="quiz-actions">
+ <button class="quiz-primary" id="quizNext" type="button">Question Suivante →</button>
+ <button id="quizRestart" type="button">↻ Recommencer</button>
+ </div>
+ <button class="return-table-button" id="returnTableButton" type="button">← Retour au Tableau Périodique</button>
+</section>
+
+<section class="info" id="info" aria-live="polite">
+ <div class="info-symbol" id="infoSymbol">H</div>
+ <div>
+ <h2 id="infoTitle">Hydrogène</h2>
+ <p id="infoDesc">Sélectionnez un élément pour afficher ses détails chimiques et ses niveaux d'énergie.</p>
+ <div class="stats" id="stats"></div>
+ </div>
+ <div class="atom-panels" id="atomPanels">
+ <div class="atom-panel shell-panel">
+ <h3>Distribution des Électrons (K, L, M…)</h3>
+ <div id="shellModel" class="shell-model"></div>
+ </div>
+ <div class="atom-panel">
+ <h3>Représentation de Lewis</h3>
+ <div id="lewisModel" class="lewis-model"></div>
+ <p id="lewisText" class="diagram-caption">Points représentant les électrons de valence du niveau externe.</p>
+ </div>
+ </div>
+</section>
+
+<p class="foot">Application de chimie interactive - Sciences 1ère Préparatoire</p>
+</main>
+
+<script>
+// Helper to compute block (s, p, d, f)
+function getBlock(n, group, family) {
+ if (family === 'lanth' || family === 'act') return 'f';
+ if (n === 1) return 's'; // H; He is displayed with group 18 (p block)
+ if (group === 1 || group === 2) return 's';
+ if (group >= 13 && group <= 18) return 'p';
+ if (group >= 3 && group <= 12) return 'd';
+ return 's';
+}
+
+// Compute simple K, L, M electron string for card display (for Z <= 20)
+const canHover=matchMedia('(hover:hover)').matches;
+// Full Bohr shell distribution (K, L, M, N, O, P, Q) for all 118 elements: Madelung filling + known exceptions.
+const SHELL_OVERRIDES={24:[2,8,13,1],29:[2,8,18,1],41:[2,8,18,12,1],42:[2,8,18,13,1],44:[2,8,18,15,1],45:[2,8,18,16,1],46:[2,8,18,18],47:[2,8,18,18,1],57:[2,8,18,18,9,2],58:[2,8,18,19,9,2],64:[2,8,18,25,9,2],78:[2,8,18,32,17,1],79:[2,8,18,32,18,1],89:[2,8,18,32,18,9,2],90:[2,8,18,32,18,10,2],91:[2,8,18,32,20,9,2],92:[2,8,18,32,21,9,2],93:[2,8,18,32,22,9,2],96:[2,8,18,32,25,9,2],103:[2,8,18,32,32,8,3]};
+const SUBSHELL_ORDER=[[1,0],[2,0],[2,1],[3,0],[3,1],[4,0],[3,2],[4,1],[5,0],[4,2],[5,1],[6,0],[4,3],[5,2],[6,1],[7,0],[5,3],[6,2],[7,1]];
+function getShells(z){
+ if(SHELL_OVERRIDES[z]) return SHELL_OVERRIDES[z].slice();
+ const out=[];let left=z;
+ for(const [n,l] of SUBSHELL_ORDER){if(left<=0)break;const c=Math.min(left,2*(2*l+1));out[n-1]=(out[n-1]||0)+c;left-=c;}
+ return out;
+}
+function getShellString(z){return getShells(z).join(', ');}
+
+const raw = [
+[1,"H","Hydrogène","1.008","nonmetal","Gaz",1,1],
+[2,"He","Hélium","4.0026","noble","Gaz",18,1],
+[3,"Li","Lithium","6.94","alkali","Solide",1,2],
+[4,"Be","Béryllium","9.0122","alkaline","Solide",2,2],
+[5,"B","Bore","10.81","metalloid","Solide",13,2],
+[6,"C","Carbone","12.011","nonmetal","Solide",14,2],
+[7,"N","Azote","14.007","nonmetal","Gaz",15,2],
+[8,"O","Oxygène","15.999","nonmetal","Gaz",16,2],
+[9,"F","Fluor","18.998","halogen","Gaz",17,2],
+[10,"Ne","Néon","20.180","noble","Gaz",18,2],
+[11,"Na","Sodium","22.990","alkali","Solide",1,3],
+[12,"Mg","Magnésium","24.305","alkaline","Solide",2,3],
+[13,"Al","Aluminium","26.982","post","Solide",13,3],
+[14,"Si","Silicium","28.085","metalloid","Solide",14,3],
+[15,"P","Phosphore","30.974","nonmetal","Solide",15,3],
+[16,"S","Soufre","32.06","nonmetal","Solide",16,3],
+[17,"Cl","Chlore","35.45","halogen","Gaz",17,3],
+[18,"Ar","Argon","39.948","noble","Gaz",18,3],
+[19,"K","Potassium","39.098","alkali","Solide",1,4],
+[20,"Ca","Calcium","40.078","alkaline","Solide",2,4],
+[21,"Sc","Scandium","44.956","transition","Solide",3,4],
+[22,"Ti","Titane","47.867","transition","Solide",4,4],
+[23,"V","Vanadium","50.942","transition","Solide",5,4],
+[24,"Cr","Chrome","51.996","transition","Solide",6,4],
+[25,"Mn","Manganèse","54.938","transition","Solide",7,4],
+[26,"Fe","Fer","55.845","transition","Solide",8,4],
+[27,"Co","Cobalt","58.933","transition","Solide",9,4],
+[28,"Ni","Nickel","58.693","transition","Solide",10,4],
+[29,"Cu","Cuivre","63.546","transition","Solide",11,4],
+[30,"Zn","Zinc","65.38","transition","Solide",12,4],
+[31,"Ga","Gallium","69.723","post","Solide",13,4],
+[32,"Ge","Germanium","72.630","metalloid","Solide",14,4],
+[33,"As","Arsenic","74.922","metalloid","Solide",15,4],
+[34,"Se","Sélénium","78.971","nonmetal","Solide",16,4],
+[35,"Br","Brome","79.904","halogen","Liquide",17,4],
+[36,"Kr","Krypton","83.798","noble","Gaz",18,4],
+[37,"Rb","Rubidium","85.468","alkali","Solide",1,5],
+[38,"Sr","Strontium","87.62","alkaline","Solide",2,5],
+[39,"Y","Yttrium","88.906","transition","Solide",3,5],
+[40,"Zr","Zirconium","91.224","transition","Solide",4,5],
+[41,"Nb","Niobium","92.906","transition","Solide",5,5],
+[42,"Mo","Molybdène","95.95","transition","Solide",6,5],
+[43,"Tc","Technétium","98","transition","Solide",7,5],
+[44,"Ru","Ruthénium","101.07","transition","Solide",8,5],
+[45,"Rh","Rhodium","102.906","transition","Solide",9,5],
+[46,"Pd","Palladium","106.42","transition","Solide",10,5],
+[47,"Ag","Argent","107.868","transition","Solide",11,5],
+[48,"Cd","Cadmium","112.414","transition","Solide",12,5],
+[49,"In","Indium","114.818","post","Solide",13,5],
+[50,"Sn","Étain","118.710","post","Solide",14,5],
+[51,"Sb","Antimoine","121.760","metalloid","Solide",15,5],
+[52,"Te","Tellure","127.60","metalloid","Solide",16,5],
+[53,"I","Iode","126.904","halogen","Solide",17,5],
+[54,"Xe","Xénon","131.293","noble","Gaz",18,5],
+[55,"Cs","Césium","132.905","alkali","Solide",1,6],
+[56,"Ba","Baryum","137.327","alkaline","Solide",2,6],
+[57,"La","Lanthane","138.905","lanth","Solide",3,6],
+[72,"Hf","Hafnium","178.49","transition","Solide",4,6],
+[73,"Ta","Tantale","180.948","transition","Solide",5,6],
+[74,"W","Tungstène","183.84","transition","Solide",6,6],
+[75,"Re","Rhénium","186.207","transition","Solide",7,6],
+[76,"Os","Osmium","190.23","transition","Solide",8,6],
+[77,"Ir","Iridium","192.217","transition","Solide",9,6],
+[78,"Pt","Platine","195.084","transition","Solide",10,6],
+[79,"Au","Or","196.967","transition","Solide",11,6],
+[80,"Hg","Mercure","200.592","transition","Liquide",12,6],
+[81,"Tl","Thallium","204.38","post","Solide",13,6],
+[82,"Pb","Plomb","207.2","post","Solide",14,6],
+[83,"Bi","Bismuth","208.980","post","Solide",15,6],
+[84,"Po","Polonium","209","post","Solide",16,6],
+[85,"At","Astate","210","halogen","Solide",17,6],
+[86,"Rn","Radon","222","noble","Gaz",18,6],
+[87,"Fr","Francium","223","alkali","Solide",1,7],
+[88,"Ra","Radium","226","alkaline","Solide",2,7],
+[89,"Ac","Actinium","227","act","Solide",3,7],
+[104,"Rf","Rutherfordium","267","transition","Solide",4,7],
+[105,"Db","Dubnium","268","transition","Solide",5,7],
+[106,"Sg","Seaborgium","269","transition","Solide",6,7],
+[107,"Bh","Bohrium","270","transition","Solide",7,7],
+[108,"Hs","Hassium","277","transition","Solide",8,7],
+[109,"Mt","Meitnérium","278","transition","Solide",9,7],
+[110,"Ds","Darmstadtium","281","transition","Solide",10,7],
+[111,"Rg","Roentgenium","282","transition","Solide",11,7],
+[112,"Cn","Copernicium","285","transition","Solide",12,7],
+[113,"Nh","Nihonium","286","post","Solide",13,7],
+[114,"Fl","Flérovium","289","post","Solide",14,7],
+[115,"Mc","Moscovium","290","post","Solide",15,7],
+[116,"Lv","Livermorium","293","post","Solide",16,7],
+[117,"Ts","Tennesse","294","halogen","Solide",17,7],
+[118,"Og","Oganesson","294","noble","Gaz",18,7],
+[58,"Ce","Cérium","140.116","lanth","Solide",4,6],
+[59,"Pr","Praséodyme","140.908","lanth","Solide",5,6],
+[60,"Nd","Néodyme","144.242","lanth","Solide",6,6],
+[61,"Pm","Prométhium","145","lanth","Solide",7,6],
+[62,"Sm","Samarium","150.36","lanth","Solide",8,6],
+[63,"Eu","Europium","151.964","lanth","Solide",9,6],
+[64,"Gd","Gadolinium","157.25","lanth","Solide",10,6],
+[65,"Tb","Terbium","158.925","lanth","Solide",11,6],
+[66,"Dy","Dysprosium","162.500","lanth","Solide",12,6],
+[67,"Ho","Holmium","164.930","lanth","Solide",13,6],
+[68,"Er","Erbium","167.259","lanth","Solide",14,6],
+[69,"Tm","Thulium","168.934","lanth","Solide",15,6],
+[70,"Yb","Ytterbium","173.045","lanth","Solide",16,6],
+[71,"Lu","Lutécium","174.967","lanth","Solide",17,6],
+[90,"Th","Thorium","232.038","act","Solide",4,7],
+[91,"Pa","Protactinium","231.036","act","Solide",5,7],
+[92,"U","Uranium","238.029","act","Solide",6,7],
+[93,"Np","Neptunium","237","act","Solide",7,7],
+[94,"Pu","Plutonium","244","act","Solide",8,7],
+[95,"Am","Américium","243","act","Solide",9,7],
+[96,"Cm","Curium","247","act","Solide",10,7],
+[97,"Bk","Berkélium","247","act","Solide",11,7],
+[98,"Cf","Californium","251","act","Solide",12,7],
+[99,"Es","Einsteinium","252","act","Solide",13,7],
+[100,"Fm","Fermium","257","act","Solide",14,7],
+[101,"Md","Mendélévium","258","act","Solide",15,7],
+[102,"No","Nobélium","259","act","Solide",16,7],
+[103,"Lr","Lawrencium","266","act","Solide",17,7]
+];
+
+const familyNames={alkali:'Métaux alcalins',alkaline:'Alcalino-terreux',transition:'Métaux de transition',post:'Métaux pauvres',metalloid:'Métalloïdes',nonmetal:'Non-métaux',halogen:'Halogènes',noble:'Gaz nobles',lanth:'Lanthanides',act:'Actinides',unknown:'Inconnu'};
+const groupCAS = ["","1A","2A","3B","4B","5B","6B","7B","","8B","","1B","2B","3A","4A","5A","6A","7A","8A"];
+
+const all=raw.map(a=>({
+ n:a[0],s:a[1],name:a[2],mass:a[3],family:a[4],state:a[5],group:a[6],period:a[7],
+ block: getBlock(a[0], a[6], a[4]),
+ config: getShellString(a[0])
+}));
+
+const byN=new Map(all.map(x=>[x.n,x]));
+const gridContainer = document.querySelector('#gridContainer');
+
+// Build Table Headers and Layout
+function renderGridTable() {
+ gridContainer.innerHTML = '';
+
+ // Top Left Corner cell
+ const corner = document.createElement('div');
+ corner.style.gridColumn = "1";
+ corner.style.gridRow = "1";
+ corner.innerHTML = '<span style="font-size:0.6rem;color:#64748b;">P\\G</span>';
+ corner.className = "group-header";
+ gridContainer.appendChild(corner);
+
+ // Group Headers (1 to 18)
+ for(let g=1; g<=18; g++) {
+  const gh = document.createElement('div');
+  gh.className = 'group-header';
+  gh.style.gridColumn = String(g + 1);
+  gh.style.gridRow = "1";
+  gh.innerHTML = `G${g} <span class="cas-name">${groupCAS[g] || ''}</span>`;
+  gridContainer.appendChild(gh);
+ }
+
+ // Period Headers (1 to 7)
+ for(let p=1; p<=7; p++) {
+  const ph = document.createElement('div');
+  ph.className = 'period-header';
+  ph.style.gridColumn = "1";
+  ph.style.gridRow = String(p + 1);
+  ph.innerHTML = `P${p}`;
+  gridContainer.appendChild(ph);
+ }
+
+ // Populate Elements into Main Grid
+ all.forEach(e => {
+  if (e.family !== 'lanth' && e.family !== 'act' || e.n === 57 || e.n === 89) {
+   const el = makeEl(e);
+   el.style.gridColumn = String(e.group + 1);
+   el.style.gridRow = String(e.period + 1);
+   gridContainer.appendChild(el);
+  }
+ });
+
+ // Block F Section (Lanthanides & Actinides)
+ const fBlockLabel = document.createElement('div');
+ fBlockLabel.className = 'block-label block-f-bg';
+ fBlockLabel.style.gridColumn = '1 / span 19';
+ fBlockLabel.style.gridRow = '9';
+ fBlockLabel.innerHTML = '✨ Bloc f — Lanthanides et Actinides (Éléments de transition interne)';
+ gridContainer.appendChild(fBlockLabel);
+
+ const lanthRowHeader = document.createElement('div');
+ lanthRowHeader.className = 'period-header';
+ lanthRowHeader.style.gridColumn = '1';
+ lanthRowHeader.style.gridRow = '10';
+ lanthRowHeader.innerHTML = 'P6';
+ gridContainer.appendChild(lanthRowHeader);
+
+ const actRowHeader = document.createElement('div');
+ actRowHeader.className = 'period-header';
+ actRowHeader.style.gridColumn = '1';
+ actRowHeader.style.gridRow = '11';
+ actRowHeader.innerHTML = 'P7';
+ gridContainer.appendChild(actRowHeader);
+
+ const lanthsContainer = document.createElement('div');
+ lanthsContainer.className = 'series-wrap';
+ lanthsContainer.style.gridColumn = '2 / span 18';
+ lanthsContainer.style.gridRow = '10';
+ gridContainer.appendChild(lanthsContainer);
+
+ const actsContainer = document.createElement('div');
+ actsContainer.className = 'series-wrap';
+ actsContainer.style.gridColumn = '2 / span 18';
+ actsContainer.style.gridRow = '11';
+ gridContainer.appendChild(actsContainer);
+
+ all.forEach(e => {
+  if (e.family === 'lanth' && e.n !== 57) {
+   const el = makeEl(e);
+   el.style.gridColumn = String(e.n - 54);
+   lanthsContainer.appendChild(el);
+  } else if (e.family === 'act' && e.n !== 89) {
+   const el = makeEl(e);
+   el.style.gridColumn = String(e.n - 86);
+   actsContainer.appendChild(el);
+  }
+ });
+}
+
+function makeEl(e){
+ const b=document.createElement('button');
+ b.className='element '+e.family;
+ b.dataset.n=e.n;
+ b.dataset.s=e.s;
+ b.dataset.name=e.name;
+ b.dataset.state=e.state;
+ b.dataset.family=e.family;
+ b.dataset.block=e.block;
+ const massInt = Math.round(parseFloat(e.mass));
+ b.innerHTML=`
+  <span class="tile-header-row"><span class="badge-z" title="Numéro atomique (Z) = Protons">${e.n}</span><span class="badge-a" title="Nombre de masse (A)">${massInt}</span></span>
+  <span class="block-badge">${e.block}</span>
+  <span class="tile-symbol-row"><span class="symbol">${e.s}</span></span>
+  <span class="tile-config-row${e.config.length>14?' long':''}" title="Configuration électronique">${e.config}</span>
+  <span class="tile-name-row"><span class="name">${e.name}</span></span>`;
+ b.setAttribute('aria-label',`${e.name} (${e.s}), Z ${e.n}`);
+ b.title=`${e.name} (${e.s}) · Z: ${e.n} | A: ${massInt} | Groupe ${e.group}, Période ${e.period} | Bloc ${e.block.toUpperCase()} | Config: ${e.config}`;
+ b.addEventListener('click',()=>{show(e);if(!canHover)document.querySelector('#info').scrollIntoView({behavior:'smooth',block:'nearest'});});
+ if(canHover)b.addEventListener('mouseenter',()=>show(e));
+ return b;
+}
+
+function legend(){
+ const entries=Object.entries(familyNames);
+ document.querySelector('#legend').innerHTML=entries.map(([k,v])=>`<span><i class="dot" style="background:var(--c)" data-c="${k}"></i>${v}</span>`).join('');
+ document.querySelectorAll('.dot').forEach(d=>{
+ const target=document.querySelector('.element.'+d.dataset.c);
+ d.style.background=target?(getComputedStyle(target).getPropertyValue('--edge')||'#aaa'):'#8997a4';
+ });
+}
+
+function valenceCount(e){if(e.n===2)return 2;if(e.group===1)return 1;if(e.group===2)return 2;if(e.group>=13&&e.group<=18)return e.group-10;return null}
+function shellCounts(e){return getShells(e.n)}
+
+function drawLewis(symbol,count){
+ const box=document.querySelector('#lewisModel');box.innerHTML='';
+ if(count===null){box.innerHTML='<span class="diagram-caption">Variable</span>';return}
+ const wrap=document.createElement('div');wrap.className='lewis-symbol';
+ const label=document.createElement('span');label.textContent=symbol;label.style.position='relative';label.style.zIndex='1';wrap.appendChild(label);
+ const sides=[{x:50,y:10,dx:12,dy:0},{x:84,y:50,dx:0,dy:12},{x:50,y:90,dx:12,dy:0},{x:16,y:50,dx:0,dy:12}];
+ for(let i=0;i<count;i++){
+ const side=sides[i%4],pair=Math.floor(i/4);
+ const dot=document.createElement('span');dot.className='lewis-dot';dot.textContent='•';
+ dot.style.left=(side.x+(side.dx?(pair===0?0:(pair===1?-1:1)*side.dx/2):0))+'%';
+ dot.style.top=(side.y+(side.dy?(pair===0?0:(pair===1?-1:1)*side.dy/2):0))+'%';
+ wrap.appendChild(dot);
+ }
+ box.appendChild(wrap);
+}
+
+function show(e){
+ document.querySelector('#infoSymbol').textContent=e.s;
+ const target=document.querySelector('.element.'+e.family);
+ if(target) document.querySelector('#infoSymbol').style.background=getComputedStyle(target).getPropertyValue('--tile');
+ document.querySelector('#infoTitle').textContent=e.name+' ('+e.s+')';
+ document.querySelector('#infoDesc').textContent=`${e.name} (Z = ${e.n}) appartient à la Période ${e.period}, Groupe ${e.group} (Bloc ${e.block.toUpperCase()}). Configuration électronique : ${e.config}. Famille des ${familyNames[e.family]}.`;
+ document.querySelector('#stats').innerHTML=[`Numéro Atomique (Z): ${e.n}`,`Masse (A): ${e.mass}`,`Période: ${e.period}`,`Groupe: ${e.group}`,`Bloc: ${e.block.toUpperCase()}`,`Configuration: ${e.config}`,`État: ${e.state}`].map(t=>`<span class="pill">${t}</span>`).join('');
+ const counts=shellCounts(e),names=['K','L','M','N','O','P','Q'];
+ document.querySelector('#shellModel').innerHTML=counts?counts.map((n,i)=>`<div class="shell-chip"><b>${names[i]}</b><span>${n}</span></div>`).join(''):'<span class="diagram-caption">Niveaux d\'énergie</span>';
+ drawLewis(e.s,valenceCount(e));
+}
+
+function apply(){
+ const q=document.querySelector('#search').value.trim().toLowerCase();
+ const state=document.querySelector('#state').value;
+ const fam=document.querySelector('#family').value;
+ const blk=document.querySelector('#blockFilter').value;
+
+ document.querySelectorAll('.element').forEach(b=>{
+ const e=byN.get(+b.dataset.n);
+ if(!e) return;
+ const match=(!q||`${e.n} ${e.s} ${e.name}`.toLowerCase().includes(q))&&
+             (state==='all'||state===e.state)&&
+             (fam==='all'||fam===e.family)&&
+             (blk==='all'||blk===e.block);
+ b.classList.toggle('dim',!match);
+ b.classList.toggle('match',match&&(q!==''||state!=='all'||fam!=='all'||blk!=='all'));
+ });
+}
+
+renderGridTable();
+
+['search','state','family','blockFilter'].forEach(id=>document.querySelector('#'+id).addEventListener(id==='search'?'input':'change',apply));
+document.querySelector('#reset').addEventListener('click',()=>{
+ document.querySelector('#search').value='';
+ document.querySelector('#state').value='all';
+ document.querySelector('#family').value='all';
+ document.querySelector('#blockFilter').value='all';
+ apply();
+});
+
+legend();show(all[0]);apply();
+
+/* 8 GAMES ENGINE - LESSONS 1 & 2 */
+const quizCategories={
+subatomic:{label:'1. Particules Subatomiques (Leçon 1)',questions:[
+ {q:'La masse de l\'atome est concentrée principalement dans :',opts:['Le noyau (النواة)','Les électrons','Les niveaux d\'énergie','Le nuage électronique'],a:'Le noyau (النواة)',why:'Car la masse des électrons est négligeable par rapport aux protons et neutrons situés dans le noyau.'},
+ {q:'Les particules de charge négative qui tournent autour du noyau sont :',opts:['Les électrons (e⁻)','Les protons (p⁺)','Les neutrons (n⁰)','Les photons'],a:'Les électrons (e⁻)',why:'Les électrons possèdent une charge négative et gravitent autour du noyau.'},
+ {q:'L\'atome est électriquement neutre à l\'état fondamental car :',opts:['Protons positifs = Électrons négatifs','Protons = Neutrons','Neutrons = Électrons','Masse noyau = Masse électrons'],a:'Protons positifs = Électrons négatifs',why:'L\'égalité des charges positives dans le noyau et négatives autour rend l\'atome neutre.'},
+ {q:'Les particules neutres situées à l\'intérieur du noyau sont :',opts:['Les neutrons (n⁰)','Les protons (p⁺)','Les électrons (e⁻)','Les ions'],a:'Les neutrons (n⁰)',why:'Les neutrons ont une charge électrique nulle (neutres).'},
+ {q:'Quelle particule porte une charge positive ?',opts:['Le proton','Le neutron','L’électron','Aucune'],a:'Le proton',why:'Le proton porte une charge électrique positive.'},
+ {q:'Quelle particule a une masse très faible par rapport au proton ?',opts:['L’électron','Le neutron','Le noyau','Le proton'],a:'L’électron',why:'La masse de l’électron est très petite devant celle du proton.'},
+ {q:'Où se trouvent les protons et les neutrons ?',opts:['Dans le noyau','Dans le nuage électronique','Sur la couche L','À l’extérieur de l’atome'],a:'Dans le noyau',why:'Le noyau contient les protons et les neutrons.'},
+ {q:'Dans un atome neutre qui possède 8 protons, combien y a-t-il d’électrons ?',opts:['8','4','16','0'],a:'8',why:'Un atome neutre possède autant d’électrons que de protons.'},
+ {q:'Comment appelle-t-on la région autour du noyau où se trouvent les électrons ?',opts:['Le nuage électronique','Le noyau','La période','Le groupe'],a:'Le nuage électronique',why:'Les électrons se trouvent autour du noyau dans le nuage électronique.'},
+ {q:'Quelle particule détermine la charge positive du noyau ?',opts:['Le proton','L’électron','Le neutron','La couche K'],a:'Le proton',why:'Le noyau est positif grâce aux protons.'}
+]},
+
+electron_config:{label:'2. Couches Électroniques (Leçon 1)',questions:[
+ {q:'La couche électronique la plus proche du noyau et de plus basse énergie est :',opts:['Couche K','Couche L','Couche M','Couche N'],a:'Couche K',why:'La première couche K est la plus proche du noyau et se contraint à 2 électrons max.'},
+ {q:'La configuration électronique du Néon (10Ne) est :',opts:['2 , 8','2 , 8 , 1','2 , 6','2 , 8 , 8'],a:'2 , 8',why:'La couche K contient 2 électrons et la couche L contient 8 électrons.'},
+ {q:'Le nombre maximal d\'électrons dans la couche M pour les 20 premiers éléments est :',opts:['8 électrons','2 électrons','18 électrons','32 électrons'],a:'8 électrons',why:'La couche M contient jusqu\'à 8 électrons pour la stabilité des premiers éléments.'},
+ {q:'L\'élément Magnesium (12Mg) a une répartition électronique de :',opts:['2 , 8 , 2','2 , 8 , 4','2 , 10','2 , 8 , 8'],a:'2 , 8 , 2',why:'Distribution : K=2, L=8, M=2 (total 12 électrons).'},
+ {q:'Combien d’électrons la couche K peut-elle contenir au maximum ?',opts:['2','8','18','32'],a:'2',why:'La première couche K peut contenir au maximum deux électrons.'},
+ {q:'La répartition électronique de l’oxygène (Z = 8) est :',opts:['2 , 6','2 , 8','2 , 5','8 , 0'],a:'2 , 6',why:'Deux électrons occupent K et six occupent L.'},
+ {q:'Combien d’électrons possède un atome neutre de sodium (Z = 11) ?',opts:['11','10','12','23'],a:'11',why:'Dans un atome neutre, électrons et protons sont en nombre égal.'},
+ {q:'Quelle couche vient juste après la couche L ?',opts:['La couche M','La couche K','La couche A','La couche Z'],a:'La couche M',why:'L’ordre des couches est K, L, M, puis N.'},
+ {q:'La répartition électronique du carbone (Z = 6) est :',opts:['2 , 4','2 , 6','4 , 2','6 , 0'],a:'2 , 4',why:'Deux électrons occupent K et quatre occupent L.'},
+ {q:'Combien d’électrons externes possède le chlore (2 , 8 , 7) ?',opts:['7','2','8','17'],a:'7',why:'La dernière couche électronique du chlore contient sept électrons.'}
+]},
+
+latin_symbols:{label:'3. Symboles & Noms Latins (Leçon 1)',questions:[
+ {q:'Le symbole chimique du Sodium (Na) provient de son nom latin :',opts:['Natrium','Sulfur','Kalium','Stannum'],a:'Natrium',why:'Na vient du nom latin Natrium.'},
+ {q:'Le symbole chimique du Potassium (K) provient du mot latin :',opts:['Kalium','Phosphorus','Plumbum','Ferrum'],a:'Kalium',why:'K est dérivé du nom latin Kalium.'},
+ {q:'Pourquoi certains symboles s\'écrivent avec deux lettres (ex: Si, Cl) ?',opts:['Pour les distinguer des éléments ayant la même première lettre','Parce qu\'ils ont 2 protons','Pour indiquer leur masse','C\'est facultatif'],a:'Pour les distinguer des éléments ayant la même première lettre',why:'La première lettre est en majuscule (Capital) et la deuxième en minuscule (Small).'},
+ {q:'Le symbole de l\'élément Aluminium selon le livre du Ministère est :',opts:['Al','Am','Au','Ag'],a:'Al',why:'Al est le symbole officiel de l\'aluminium.'},
+ {q:'Quel est le symbole chimique du fer ?',opts:['Fe','F','Fr','Ir'],a:'Fe',why:'Fe est le symbole du fer, issu du latin Ferrum.'},
+ {q:'Quel élément possède le symbole Cu ?',opts:['Cuivre','Carbone','Calcium','Cobalt'],a:'Cuivre',why:'Cu est le symbole chimique du cuivre.'},
+ {q:'Quel est le symbole chimique de l’or ?',opts:['Au','Ag','Or','O'],a:'Au',why:'Au vient du nom latin Aurum.'},
+ {q:'Quel est le symbole chimique de l’argent ?',opts:['Ag','Au','Ar','Al'],a:'Ag',why:'Ag vient du nom latin Argentum.'},
+ {q:'Dans le symbole Cl, quelle lettre est en majuscule ?',opts:['C','l','Les deux','Aucune'],a:'C',why:'La première lettre d’un symbole chimique est toujours en majuscule.'},
+ {q:'Quel élément correspond au symbole K ?',opts:['Potassium','Calcium','Krypton','Cuivre'],a:'Potassium',why:'K est le symbole du potassium, dérivé du latin Kalium.'}
+]},
+
+mass_number:{label:'4. Nombre Atomique & Massique (Leçon 1)',questions:[
+ {q:'Le nombre atomique (Z) représente le nombre de :',opts:['Protons positifs dans le noyau','Neutrons dans le noyau','Protons + Neutrons','Niveaux d\'énergie'],a:'Protons positifs dans le noyau',why:'Z est le nombre de protons dans le noyau et est égal au nombre d\'électrons.'},
+ {q:'Le nombre massique (A) d\'un atome de Sodium (11 protons, 12 neutrons) est :',opts:['23','11','12','1'],a:'23',why:'A = Nombre de protons + Nombre de neutrons (11 + 12 = 23).'},
+ {q:'Comment calcule-t-on le nombre de neutrons dans un noyau ?',opts:['Nombre Massique (A) − Nombre Atomique (Z)','A + Z','Z ÷ 2','Seulement Z'],a:'Nombre Massique (A) − Nombre Atomique (Z)',why:'Nombre de neutrons = A − Z.'},
+ {q:'Si le nombre atomique est 17 et le nombre massique est 35 (Chlore), les neutrons sont :',opts:['18','17','35','52'],a:'18',why:'35 − 17 = 18 neutrons.'},
+ {q:'Un atome contient 6 protons et 6 neutrons. Son nombre massique A est :',opts:['12','6','0','36'],a:'12',why:'A = protons + neutrons = 6 + 6.'},
+ {q:'Un atome a Z = 9 et A = 19. Combien possède-t-il de neutrons ?',opts:['10','9','19','28'],a:'10',why:'Le nombre de neutrons est A − Z = 19 − 9.'},
+ {q:'Quel symbole représente le nombre atomique ?',opts:['Z','A','N','e'],a:'Z',why:'Z représente le nombre atomique, égal au nombre de protons.'},
+ {q:'Quel symbole représente le nombre massique ?',opts:['A','Z','G','P'],a:'A',why:'A représente la somme des protons et des neutrons.'},
+ {q:'Un atome neutre possède 13 protons. Combien possède-t-il d’électrons ?',opts:['13','26','14','0'],a:'13',why:'Dans un atome neutre, le nombre de protons est égal au nombre d’électrons.'},
+ {q:'Un noyau contient 17 protons et 18 neutrons. Son nombre massique est :',opts:['35','18','17','1'],a:'35',why:'A = 17 + 18 = 35.'}
+]},
+
+periodic_trends:{label:'5. Tableau Périodique Moderne (Leçon 2)',questions:[
+ {q:'Dans le tableau périodique moderne, les éléments sont rangés par ordre croissant de :',opts:['Numéro atomique (Z) et remplissage des sous-couches','Masse atomique seulement','Nombre de neutrons','Propriétés physiques uniquement'],a:'Numéro atomique (Z) et remplissage des sous-couches',why:'C\'est la loi périodique moderne basée sur Z.'},
+ {q:'Les lignes horizontales du tableau périodique sont appelées :',opts:['Périodes','Groupes','Familles','Séries'],a:'Périodes',why:'Le tableau périodique comprend 7 périodes horizontales.'},
+ {q:'Les colonnes verticales du tableau périodique sont appelées :',opts:['Groupes','Périodes','Niveaux','Couches'],a:'Groupes',why:'Le tableau comprend 18 groupes verticaux.'},
+ {q:'Tous les éléments d\'une même période ont le même nombre de :',opts:['Niveaux d\'énergie occupés','Électrons de valence','Protons','Neutrons'],a:'Niveaux d\'énergie occupés',why:'Le numéro de la période indique le nombre de couches électroniques.'},
+ {q:'Combien de périodes horizontales compte le tableau périodique ?',opts:['7','8','18','10'],a:'7',why:'Le tableau périodique moderne comprend sept périodes.'},
+ {q:'Combien de groupes verticaux compte le tableau périodique moderne ?',opts:['18','7','10','118'],a:'18',why:'Le tableau périodique moderne comprend dix-huit groupes.'},
+ {q:'Quel est le numéro atomique de l’hydrogène ?',opts:['1','2','0','8'],a:'1',why:'L’hydrogène est le premier élément : Z = 1.'},
+ {q:'Quel élément vient juste après le carbone (Z = 6) ?',opts:['Azote (Z = 7)','Bore (Z = 5)','Oxygène (Z = 8)','Hélium (Z = 2)'],a:'Azote (Z = 7)',why:'Les éléments sont rangés par numéro atomique croissant.'},
+ {q:'Les éléments d’un même groupe ont souvent des propriétés chimiques :',opts:['Similaires','Toujours opposées','Sans aucun lien','Identiques en masse'],a:'Similaires',why:'Les éléments d’un même groupe ont souvent des propriétés chimiques semblables.'},
+ {q:'Quel renseignement donne le numéro atomique d’un élément ?',opts:['Le nombre de protons','Le nombre de couches','La masse en grammes','L’état physique seulement'],a:'Le nombre de protons',why:'Le numéro atomique est égal au nombre de protons du noyau.'}
+]},
+
+groups_periods:{label:'6. Localisation des Éléments (Leçon 2)',questions:[
+ {q:'L\'élément 12Mg (2, 8, 2) se situe dans la période :',opts:['Période 3','Période 2','Période 1','Période 4'],a:'Période 3',why:'Il possède 3 couches électroniques occupées (K, L, M).'},
+ {q:'Un élément ayant 7 électrons dans sa couche externe appartient au groupe :',opts:['Groupe 17 (7A)','Groupe 1 (1A)','Groupe 2','Groupe 18'],a:'Groupe 17 (7A)',why:'Le nombre d\'électrons externes (7) détermine le groupe (7A / 17).'},
+ {q:'L\'élément Calcium (20Ca: 2, 8, 8, 2) appartient au groupe :',opts:['Groupe 2 (2A)','Groupe 4','Groupe 18','Groupe 1'],a:'Groupe 2 (2A)',why:'Il a 2 électrons de valence dans la couche externe N.'},
+ {q:'L\'élément Argon (18Ar: 2, 8, 8) se situe dans la période :',opts:['Période 3','Période 8','Période 2','Période 4'],a:'Période 3',why:'Il occupe 3 couches électroniques (K, L, M).'},
+ {q:'Un élément qui possède deux couches électroniques occupées est dans la période :',opts:['2','1','3','4'],a:'2',why:'Le nombre de couches occupées indique la période.'},
+ {q:'Le néon a la répartition 2 , 8. Dans quelle période se trouve-t-il ?',opts:['Période 2','Période 1','Période 3','Période 8'],a:'Période 2',why:'Deux couches sont occupées : K et L.'},
+ {q:'Un élément possède un électron sur sa couche externe. Il est généralement dans le groupe :',opts:['1','2','17','18'],a:'1',why:'Pour les éléments principaux étudiés, un électron externe correspond au groupe 1.'},
+ {q:'Le magnésium (2 , 8 , 2) possède combien de couches occupées ?',opts:['3','2','8','12'],a:'3',why:'Les couches K, L et M sont occupées.'},
+ {q:'Quelle information permet de trouver la période à partir de la répartition électronique ?',opts:['Le nombre de couches occupées','Le nombre de neutrons','La première lettre du symbole','La masse uniquement'],a:'Le nombre de couches occupées',why:'Le nombre de couches occupées indique la période.'},
+ {q:'Le lithium (2 , 1) appartient à quelle période ?',opts:['Période 2','Période 1','Période 3','Période 7'],a:'Période 2',why:'Le lithium possède deux couches occupées.'}
+]},
+
+chemical_families:{label:'7. Familles Chimiques (Leçon 2)',questions:[
+ {q:'Les éléments du Groupe 1 (1A) sont appelés :',opts:['Métaux Alcalins (الأقلاء)','Halogènes','Gaz nobles','Métaux de transition'],a:'Métaux Alcalins (الأقلاء)',why:'Ce sont des métaux très réactifs comme Sodium (Na) et Potassium (K).'},
+ {q:'Les éléments du Groupe 17 (7A) sont appelés :',opts:['Halogènes','Alcalins','Gaz inertes','Alcalino-terreux'],a:'Halogènes',why:'Ils réagissent avec les métaux pour former des sels (ex: Chlore, Fluor).'},
+ {q:'Les éléments du Groupe 18 caractérisés par une couche externe saturée sont :',opts:['Gaz Nobles / Inertes','Halogènes','Alcalins','Actinides'],a:'Gaz Nobles / Inertes',why:'Leur couche externe est complète (8 e⁻, ou 2 pour Hélium).'},
+ {q:'Quel gaz noble possède seulement 2 électrons au total ?',opts:['Hélium (He)','Néon (Ne)','Argon (Ar)','Krypton (Kr)'],a:'Hélium (He)',why:'Son numéro atomique est 2, saturant sa seule couche K.'},
+ {q:'Le sodium (Na) appartient à quelle famille ?',opts:['Métaux alcalins','Gaz nobles','Halogènes','Actinides'],a:'Métaux alcalins',why:'Le sodium se trouve dans le groupe 1.'},
+ {q:'Quel élément est un halogène ?',opts:['Fluor (F)','Néon (Ne)','Sodium (Na)','Magnésium (Mg)'],a:'Fluor (F)',why:'Le fluor appartient au groupe 17.'},
+ {q:'Quel élément est un gaz noble ?',opts:['Hélium (He)','Chlore (Cl)','Lithium (Li)','Calcium (Ca)'],a:'Hélium (He)',why:'L’hélium appartient au groupe 18.'},
+ {q:'Le calcium (Ca) appartient à la famille des :',opts:['Alcalino-terreux','Halogènes','Gaz nobles','Métaux alcalins'],a:'Alcalino-terreux',why:'Le calcium se trouve dans le groupe 2.'},
+ {q:'À température ambiante, quel élément est liquide ?',opts:['Brome (Br)','Oxygène (O)','Sodium (Na)','Carbone (C)'],a:'Brome (Br)',why:'Le brome est liquide à température ambiante.'},
+ {q:'Les éléments d’une même famille chimique se trouvent principalement dans la même :',opts:['Colonne','Ligne','Case de masse','Période uniquement'],a:'Colonne',why:'Une famille chimique correspond à une colonne du tableau.'}
+]},
+
+october_challenge:{label:'8. Challenge Révision Octobre (Global)',questions:[
+ {q:'Le noyau de l\'atome est de charge positive à cause de la présence de :',opts:['Protons positifs et Neutrons neutres','Électrons négatifs','Neutrons uniquement','Électrons et Protons'],a:'Protons positifs et Neutrons neutres',why:'La présence des protons positifs donne au noyau sa charge positive.'},
+ {q:'L\'élément Chlore (17Cl: 2, 8, 7) appartient au groupe des :',opts:['Halogènes (Groupe 17)','Alcalins','Gaz Inertes','Alcalino-terreux'],a:'Halogènes (Groupe 17)',why:'Il contient 7 électrons de valence.'},
+ {q:'Quel est l\'élément qui ne participe pas aux réactions chimiques dans les conditions normales ?',opts:['Argon (18Ar)','Sodium (11Na)','Oxygène (8O)','Hydrogène (1H)'],a:'Argon (18Ar)',why:'C\'est un gaz noble chimiquement inert à couche externe saturée.'},
+ {q:'Nombre de niveaux d\'énergie occupés chez l\'atome de Potassium (19K: 2, 8, 8, 1) :',opts:['4 couches (K, L, M, N)','3 couches','2 couches','5 couches'],a:'4 couches (K, L, M, N)',why:'Il occupe 4 couches d\'énergie.'},
+ {q:'Quelle particule détermine le numéro atomique Z ?',opts:['Le proton','Le neutron','L’électron seulement','Le photon'],a:'Le proton',why:'Z est égal au nombre de protons.'},
+ {q:'Un atome neutre contient 12 protons. Combien a-t-il d’électrons ?',opts:['12','6','24','0'],a:'12',why:'Un atome neutre possède autant d’électrons que de protons.'},
+ {q:'Un atome possède 15 protons et 16 neutrons. Son nombre massique est :',opts:['31','15','16','1'],a:'31',why:'A = 15 + 16 = 31.'},
+ {q:'Si A = 40 et Z = 20, le nombre de neutrons est :',opts:['20','40','60','10'],a:'20',why:'Le nombre de neutrons est A − Z.'},
+ {q:'Quelle particule possède une charge électrique négative ?',opts:['L’électron','Le proton','Le neutron','Le noyau entier'],a:'L’électron',why:'L’électron porte une charge négative.'},
+ {q:'Quelle particule n’a pas de charge électrique ?',opts:['Le neutron','Le proton','L’électron','Aucune'],a:'Le neutron',why:'Le neutron est électriquement neutre.'},
+ {q:'Où se trouve presque toute la masse de l’atome ?',opts:['Dans le noyau','Dans la couche L','Dans les électrons','À l’extérieur de l’atome'],a:'Dans le noyau',why:'Les protons et neutrons du noyau portent presque toute la masse.'},
+ {q:'La répartition électronique du fluor (Z = 9) est :',opts:['2 , 7','2 , 8','2 , 6','9 , 0'],a:'2 , 7',why:'Les neuf électrons se répartissent 2 sur K et 7 sur L.'},
+ {q:'La répartition électronique de l’aluminium (Z = 13) est :',opts:['2 , 8 , 3','2 , 7 , 4','2 , 8 , 8','2 , 11'],a:'2 , 8 , 3',why:'Les treize électrons se répartissent 2, 8 et 3.'},
+ {q:'Combien d’électrons externes possède le sodium (2 , 8 , 1) ?',opts:['1','2','8','11'],a:'1',why:'La couche externe du sodium contient un électron.'},
+ {q:'Quel symbole représente le sodium ?',opts:['Na','S','So','N'],a:'Na',why:'Na est le symbole chimique du sodium.'},
+ {q:'Quel élément correspond au symbole Mg ?',opts:['Magnésium','Manganèse','Mercure','Molybdène'],a:'Magnésium',why:'Mg est le symbole chimique du magnésium.'},
+ {q:'Dans le symbole Na, la deuxième lettre est :',opts:['Minuscule','Majuscule','Un chiffre','Absente'],a:'Minuscule',why:'La première lettre est majuscule et la deuxième minuscule.'},
+ {q:'Un élément ayant trois couches électroniques occupées se trouve dans la période :',opts:['3','2','1','4'],a:'3',why:'Le nombre de couches occupées indique le numéro de la période.'},
+ {q:'Un élément qui possède deux électrons externes appartient généralement au groupe :',opts:['2','1','17','18'],a:'2',why:'Pour les éléments principaux, deux électrons externes correspondent au groupe 2.'},
+ {q:'Le magnésium (Z = 12) se trouve dans le groupe :',opts:['2','1','17','18'],a:'2',why:'Sa répartition 2, 8, 2 montre qu’il possède deux électrons externes.'},
+ {q:'Les éléments du groupe 1 sont appelés :',opts:['Métaux alcalins','Halogènes','Gaz nobles','Alcalino-terreux'],a:'Métaux alcalins',why:'Le groupe 1 est celui des métaux alcalins, à l’exception de l’hydrogène.'},
+ {q:'Les éléments du groupe 2 sont appelés :',opts:['Métaux alcalino-terreux','Halogènes','Gaz nobles','Métaux alcalins'],a:'Métaux alcalino-terreux',why:'Le calcium et le magnésium appartiennent au groupe 2.'},
+ {q:'Les éléments du groupe 17 sont appelés :',opts:['Halogènes','Gaz nobles','Métaux alcalins','Actinides'],a:'Halogènes',why:'Le fluor et le chlore appartiennent au groupe 17.'},
+ {q:'Les éléments du groupe 18 sont appelés :',opts:['Gaz nobles','Halogènes','Métaux alcalins','Alcalino-terreux'],a:'Gaz nobles',why:'Le groupe 18 comprend les gaz nobles.'},
+ {q:'Quel élément appartient au groupe des gaz nobles ?',opts:['Néon (Ne)','Chlore (Cl)','Sodium (Na)','Magnésium (Mg)'],a:'Néon (Ne)',why:'Le néon appartient au groupe 18.'},
+ {q:'Quel élément appartient au groupe des métaux alcalino-terreux ?',opts:['Calcium (Ca)','Potassium (K)','Fluor (F)','Argon (Ar)'],a:'Calcium (Ca)',why:'Le calcium est un élément du groupe 2.'},
+ {q:'Quel est le numéro atomique du carbone ?',opts:['6','12','8','4'],a:'6',why:'Le carbone possède six protons, donc Z = 6.'},
+ {q:'Quel élément possède la répartition électronique 2 , 8 , 1 ?',opts:['Sodium','Magnésium','Néon','Chlore'],a:'Sodium',why:'Le sodium possède onze électrons répartis 2, 8, 1.'},
+ {q:'Combien d’électrons possède l’atome neutre d’oxygène (Z = 8) ?',opts:['8','16','6','2'],a:'8',why:'Dans un atome neutre, le nombre d’électrons est égal à Z.'},
+ {q:'Si un atome a 20 protons et 20 neutrons, son nombre massique est :',opts:['40','20','0','10'],a:'40',why:'A est la somme des protons et des neutrons.'},
+ {q:'Lequel est un métal alcalin ?',opts:['Potassium (K)','Argon (Ar)','Chlore (Cl)','Calcium (Ca)'],a:'Potassium (K)',why:'Le potassium appartient au groupe 1.'},
+ {q:'Lequel est un halogène ?',opts:['Chlore (Cl)','Hélium (He)','Magnésium (Mg)','Sodium (Na)'],a:'Chlore (Cl)',why:'Le chlore appartient au groupe 17.'},
+ {q:'Dans le tableau périodique, les groupes sont-ils horizontaux ou verticaux ?',opts:['Verticaux','Horizontaux','Diagonaux','Aucun'],a:'Verticaux',why:'Les groupes sont les colonnes verticales.'},
+ {q:'Dans le tableau périodique, les périodes sont-elles horizontales ou verticales ?',opts:['Horizontales','Verticales','Diagonales','Aucune'],a:'Horizontales',why:'Les périodes sont les lignes horizontales.'},
+ {q:'Quel élément possède le symbole O ?',opts:['Oxygène','Or','Osmium','Ozone'],a:'Oxygène',why:'O est le symbole chimique de l’oxygène.'},
+ {q:'Quel est le nombre de protons dans un atome de magnésium (Z = 12) ?',opts:['12','24','10','2'],a:'12',why:'Le numéro atomique donne le nombre de protons.'},
+ {q:'Un atome a 11 protons et 12 neutrons. Quel est son nombre massique ?',opts:['23','11','12','1'],a:'23',why:'Le nombre massique est la somme des protons et des neutrons.'},
+ {q:'Quel élément possède une seule couche électronique occupée et Z = 2 ?',opts:['Hélium','Hydrogène','Lithium','Néon'],a:'Hélium',why:'L’hélium possède deux électrons sur sa couche K.'},
+ {q:'Quel élément a la répartition électronique 2 , 8 ?',opts:['Néon','Sodium','Oxygène','Magnésium'],a:'Néon',why:'Le néon possède dix électrons répartis 2, 8.'},
+ {q:'Dans un atome neutre, si le nombre de protons augmente, le nombre d’électrons :',opts:['Augmente de façon égale','Devient toujours zéro','Ne peut jamais changer','Devient le nombre de neutrons'],a:'Augmente de façon égale',why:'Un atome neutre a autant de protons que d’électrons.'}
+]}
+};
+
+let currentCategory='subatomic',quizOrder=[],quizIndex=0,quizScore=0,quizAnswered=false;
+const qEl=document.querySelector('#quizQuestion'),answersEl=document.querySelector('#quizAnswers');
+
+function shuffle(arr){const out=[...arr];for(let i=out.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[out[i],out[j]]=[out[j],out[i]];}return out;}
+
+function setCategory(key,title){
+ currentCategory=quizCategories[key]?key:'subatomic';
+ document.querySelector('#quizCategoryLabel').textContent=`Jeu : ${title||quizCategories[currentCategory].label}`;
+ document.querySelector('#activeGameTitle').textContent='🎯 '+(title||quizCategories[currentCategory].label);
+ startQuiz();
+}
+
+function startQuiz(){
+ const bank=quizCategories[currentCategory].questions;
+ quizOrder=shuffle(bank).slice(0,Math.min(10,bank.length));
+ quizIndex=0;quizScore=0;quizAnswered=false;
+ document.querySelector('#quizScore').textContent='⭐ Score: 0';
+ document.querySelector('#quizNext').textContent='Question Suivante →';
+ renderQuestion();
+}
+
+function renderQuestion(){
+ quizAnswered=false;
+ if(quizIndex>=quizOrder.length){
+ qEl.textContent=`🏆 Résultat Final: Vous avez obtenu ${quizScore} sur ${quizOrder.length * 10} points !`;
+ answersEl.innerHTML='';
+ document.querySelector('#quizFeedback').textContent='Bravo ! Excellente révision des leçons 1 et 2.';
+ document.querySelector('#quizProgress').style.width='100%';
+ document.querySelector('#quizNext').textContent='Recommencer le Jeu ↻';
+ return;
+ }
+ const item=quizOrder[quizIndex];
+ document.querySelector('#quizRound').textContent=`Question ${quizIndex+1} / ${quizOrder.length}`;
+ document.querySelector('#quizProgress').style.width=`${(quizIndex/quizOrder.length)*100}%`;
+ qEl.textContent=item.q;
+ document.querySelector('#quizFeedback').textContent='Choisissez la bonne réponse.';
+ answersEl.innerHTML='';
+ shuffle(item.opts).forEach(opt=>{
+ const b=document.createElement('button');
+ b.type='button';b.className='quiz-answer';b.textContent=opt;
+ b.addEventListener('click',()=>answerQuiz(opt,b));
+ answersEl.appendChild(b);
+ });
+}
+
+function answerQuiz(opt,button){
+ if(quizAnswered)return;
+ quizAnswered=true;
+ const item=quizOrder[quizIndex],correct=opt===item.a;
+ [...answersEl.children].forEach(b=>{b.disabled=true;if(b.textContent===item.a)b.classList.add('correct')});
+ if(!correct)button.classList.add('wrong');
+ if(correct){
+ quizScore+=10;
+ document.querySelector('#quizScore').textContent=`⭐ Score: ${quizScore}`;
+ document.querySelector('#quizFeedback').textContent='✅ Bonne réponse ! '+item.why;
+ }else{
+ document.querySelector('#quizFeedback').textContent='❌ Mauvaise réponse ! La réponse est: '+item.a + ' (' + item.why + ')';
+ }
+}
+
+document.querySelector('#quizNext').addEventListener('click',()=>{
+ if(quizIndex>=quizOrder.length){startQuiz();return;}
+ if(!quizAnswered){document.querySelector('#quizFeedback').textContent='Veuillez d\'abord sélectionner une réponse !';return;}
+ quizIndex++;renderQuestion();
+});
+document.querySelector('#quizRestart').addEventListener('click',startQuiz);
+
+/* Modal & Background Overlay Handlers */
+const gameModal=document.querySelector('#gameModal');
+let lastFocus=null;
+const refocus=()=>{if(lastFocus&&lastFocus.isConnected&&lastFocus.focus)lastFocus.focus({preventScroll:true});};
+function showGameModal(){lastFocus=document.activeElement;gameModal.classList.remove('hidden');document.body.classList.add('modal-open');document.querySelector('#closeGameModal').focus({preventScroll:true});}
+function hideGameModal(restore=true){gameModal.classList.add('hidden');document.body.classList.remove('modal-open');if(restore)refocus();}
+function closeQuiz(){document.body.classList.remove('quiz-mode');refocus();}
+
+document.querySelector('#quizLaunchButton').addEventListener('click',showGameModal);
+document.querySelector('#neonToggle').addEventListener('click',showGameModal);
+document.querySelector('#closeGameModal').addEventListener('click',()=>hideGameModal());
+gameModal.addEventListener('click',e=>{if(e.target===gameModal)hideGameModal();});
+
+document.querySelectorAll('.game-card').forEach(card=>{
+ card.addEventListener('click',()=>{
+  const key=card.dataset.game;
+  const title=card.dataset.title||'Jeu';
+  hideGameModal(false);
+  document.body.classList.add('quiz-mode');
+  setCategory(key,title);
+  const h=document.querySelector('#activeGameTitle');h.tabIndex=-1;h.focus({preventScroll:true});
+ });
+});
+document.querySelector('#returnTableButton').addEventListener('click',closeQuiz);
+document.addEventListener('keydown',e=>{
+ if(e.key!=='Escape')return;
+ if(!settingsPanel.hidden){setSettingsOpen(false);settingsToggle.focus();return;}
+ if(!gameModal.classList.contains('hidden'))hideGameModal();
+ else if(document.body.classList.contains('quiz-mode'))closeQuiz();
+});
+
+/* Zoom System */
+let tableZoom=1;
+function applyTableZoom(){
+ document.querySelector('.table-wrap').style.setProperty('--table-zoom',tableZoom);
+ document.querySelector('#zoomValue').textContent=Math.round(tableZoom*100)+'%';
+}
+document.querySelector('#zoomIn').addEventListener('click',()=>{tableZoom=Math.min(1.6,Math.round((tableZoom+.1)*10)/10);applyTableZoom()});
+document.querySelector('#zoomOut').addEventListener('click',()=>{tableZoom=Math.max(.6,Math.round((tableZoom-.1)*10)/10);applyTableZoom()});
+document.querySelector('#zoomReset').addEventListener('click',()=>{tableZoom=1;applyTableZoom()});
+
+// Chemistry mixer: all 118 elements plus a searchable educational compound catalog.
+const mixerPanel=document.querySelector('#mixerPanel');
+const mixerSubs={'1':'','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉','10':'₁₀','11':'₁₁','12':'₁₂'};
+const elementList=[
+['H','Hydrogène'],['He','Hélium'],['Li','Lithium'],['Be','Béryllium'],['B','Bore'],['C','Carbone'],['N','Azote'],['O','Oxygène'],['F','Fluor'],['Ne','Néon'],
+['Na','Sodium'],['Mg','Magnésium'],['Al','Aluminium'],['Si','Silicium'],['P','Phosphore'],['S','Soufre'],['Cl','Chlore'],['Ar','Argon'],['K','Potassium'],['Ca','Calcium'],
+['Sc','Scandium'],['Ti','Titane'],['V','Vanadium'],['Cr','Chrome'],['Mn','Manganèse'],['Fe','Fer'],['Co','Cobalt'],['Ni','Nickel'],['Cu','Cuivre'],['Zn','Zinc'],
+['Ga','Gallium'],['Ge','Germanium'],['As','Arsenic'],['Se','Sélénium'],['Br','Brome'],['Kr','Krypton'],['Rb','Rubidium'],['Sr','Strontium'],['Y','Yttrium'],['Zr','Zirconium'],
+['Nb','Niobium'],['Mo','Molybdène'],['Tc','Technétium'],['Ru','Ruthénium'],['Rh','Rhodium'],['Pd','Palladium'],['Ag','Argent'],['Cd','Cadmium'],['In','Indium'],['Sn','Étain'],
+['Sb','Antimoine'],['Te','Tellure'],['I','Iode'],['Xe','Xénon'],['Cs','Césium'],['Ba','Baryum'],['La','Lanthane'],['Ce','Cérium'],['Pr','Praséodyme'],['Nd','Néodyme'],
+['Pm','Prométhium'],['Sm','Samarium'],['Eu','Europium'],['Gd','Gadolinium'],['Tb','Terbium'],['Dy','Dysprosium'],['Ho','Holmium'],['Er','Erbium'],['Tm','Thulium'],['Yb','Ytterbium'],
+['Lu','Lutécium'],['Hf','Hafnium'],['Ta','Tantale'],['W','Tungstène'],['Re','Rhénium'],['Os','Osmium'],['Ir','Iridium'],['Pt','Platine'],['Au','Or'],['Hg','Mercure'],
+['Tl','Thallium'],['Pb','Plomb'],['Bi','Bismuth'],['Po','Polonium'],['At','Astate'],['Rn','Radon'],['Fr','Francium'],['Ra','Radium'],['Ac','Actinium'],['Th','Thorium'],
+['Pa','Protactinium'],['U','Uranium'],['Np','Neptunium'],['Pu','Plutonium'],['Am','Américium'],['Cm','Curium'],['Bk','Berkélium'],['Cf','Californium'],['Es','Einsteinium'],['Fm','Fermium'],
+['Md','Mendélévium'],['No','Nobélium'],['Lr','Lawrencium'],['Rf','Rutherfordium'],['Db','Dubnium'],['Sg','Seaborgium'],['Bh','Bohrium'],['Hs','Hassium'],['Mt','Meitnérium'],['Ds','Darmstadtium'],
+['Rg','Roentgenium'],['Cn','Copernicium'],['Nh','Nihonium'],['Fl','Flérovium'],['Mc','Moscovium'],['Lv','Livermorium'],['Ts','Tennesse'],['Og','Oganesson']
+];
+const elementNames=Object.fromEntries(elementList);
+let currentLang='fr';
+const languageText={
+ fr:{language:'Langue',add:'＋ Ajouter un élément',check:'Vérifier la combinaison',example:'Exemple : eau',catalog:'📚 Catalogue des composés',close:'Fermer',initial:'Choisissez les éléments puis cliquez sur « Vérifier la combinaison ».',notFound:'Aucun composé correspondant dans les exemples actuels.',notFoundDesc:'Éléments sélectionnés',notProof:'Cela ne prouve pas que la formule est chimiquement impossible : le catalogue est éducatif et non exhaustif.',hydrogen:'Molécule de dihydrogène',oxygen:'Molécule de dioxygène',searchEmpty:'Aucun résultat correspondant.',compound:'Nom du composé',formula:'Formule',atoms:'Éléments et nombre d’atomes',help:'Commencez avec deux éléments côte à côte. Cliquez sur « Ajouter un élément » pour en ajouter jusqu’à six, puis choisissez le nombre d’atomes de chacun.'},
+ en:{language:'Language',add:'＋ Add element',check:'Check combination',example:'Example: water',catalog:'📚 Compound catalogue',close:'Close',initial:'Choose elements, then click “Check combination”.',notFound:'No matching compound in the current examples.',notFoundDesc:'Selected elements',notProof:'This does not prove the formula is chemically impossible; the database is educational and not exhaustive.',hydrogen:'Hydrogen molecule',oxygen:'Oxygen molecule',searchEmpty:'No matching results.',compound:'Compound name',formula:'Formula',atoms:'Elements and atom counts',help:'Start with two elements side by side. Click “Add element” to add up to six, then choose the atom count for each.'},
+ ar:{language:'اللغة',add:'＋ أضف عنصرًا',check:'تحقّق من التركيبة',example:'مثال: الماء',catalog:'📚 جدول المركّبات',close:'إغلاق',initial:'اختر العناصر ثم اضغط «تحقّق من التركيبة».',notFound:'لا يوجد مركّب مطابق في الأمثلة الحالية.',notFoundDesc:'العناصر المختارة',notProof:'هذا لا يثبت أن الصيغة مستحيلة كيميائيًا؛ قاعدة البيانات تعليمية وغير شاملة.',hydrogen:'جزيء الهيدروجين',oxygen:'جزيء الأكسجين',searchEmpty:'لا توجد نتائج مطابقة.',compound:'اسم المركّب',formula:'الصيغة',atoms:'العناصر وعدد الذرات',help:'ابدأ بعنصرين جنبًا إلى جنب. اضغط «أضف عنصرًا» لإضافة ما يصل إلى ستة عناصر، ثم اختر عدد الذرات لكل عنصر.'}
+};
+const compoundNames={
+'H₂O':['Eau','Water','الماء'],'H₂S':['Sulfure d’hydrogène','Hydrogen sulfide','كبريتيد الهيدروجين'],'HCl':['Chlorure d’hydrogène','Hydrogen chloride','كلوريد الهيدروجين'],'HF':['Fluorure d’hydrogène','Hydrogen fluoride','فلوريد الهيدروجين'],'HBr':['Bromure d’hydrogène','Hydrogen bromide','بروميد الهيدروجين'],'CO₂':['Dioxyde de carbone','Carbon dioxide','ثاني أكسيد الكربون'],'CO':['Monoxyde de carbone','Carbon monoxide','أول أكسيد الكربون'],'NH₃':['Ammoniac','Ammonia','الأمونيا'],'CH₄':['Méthane','Methane','الميثان'],'NaCl':['Chlorure de sodium','Sodium chloride','كلوريد الصوديوم'],'MgO':['Oxyde de magnésium','Magnesium oxide','أكسيد المغنيسيوم'],'SO₂':['Dioxyde de soufre','Sulfur dioxide','ثاني أكسيد الكبريت'],'C₆H₁₂O₆':['Glucose','Glucose','الجلوكوز'],'(NH₄)₃PO₄':['Phosphate d’ammonium','Ammonium phosphate','فوسفات الأمونيوم'],'Ca(HCO₃)₂':['Bicarbonate de calcium','Calcium bicarbonate','بيكربونات الكالسيوم'],'NaHCO₃':['Bicarbonate de sodium','Sodium bicarbonate (baking soda)','بيكربونات الصوديوم'],'C₂H₆O':['Éthanol','Ethanol','الإيثانول'],'C₂H₄O₂':['Acide acétique','Acetic acid','حمض الخليك'],'CaCO₃':['Carbonate de calcium','Calcium carbonate','كربونات الكالسيوم'],'C₁₂H₂₂O₁₁':['Saccharose','Sucrose','السكروز']
+};
+function getCompoundName(c){return compoundNames[c.formula]?.[['fr','en','ar'].indexOf(currentLang)]||c.name;}
+function applyLanguage(lang){currentLang=lang;const t=languageText[lang];document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';document.querySelector('#languageLabel').textContent=t.language;
+ document.querySelector('#settingsButtonLabel').textContent=lang==='fr'?'Paramètres':lang==='en'?'Settings':'الإعدادات';
+ document.querySelector('#settingsTitle').textContent='⚙️ '+(lang==='fr'?'Paramètres':lang==='en'?'Settings':'الإعدادات');
+ document.querySelector('#themeLabel').textContent=lang==='fr'?'Thème personnalisé':lang==='en'?'Custom theme':'السمة المخصصة';
+ const themeNames={default:lang==='fr'?'Normal / Défaut':lang==='en'?'Normal / Default':'عادي / افتراضي',red:lang==='fr'?'Rouge':lang==='en'?'Red':'أحمر',blue:lang==='fr'?'Bleu':lang==='en'?'Blue':'أزرق',black:lang==='fr'?'Noir':lang==='en'?'Black':'أسود',glass:'Liquid Glass'};
+ document.querySelectorAll('[data-theme-name]').forEach(el=>el.textContent=themeNames[el.dataset.themeName]);
+ document.querySelector('#mixerLaunch').textContent='🧪 '+(lang==='fr'?'Mixer de chimie':lang==='en'?'Chemistry Mixer':'خلاط الكيمياء');
+ document.querySelector('#mixerHelp').textContent=t.help;document.querySelector('#mixAddElement').textContent=t.add;document.querySelector('#mixCheck').textContent=t.check;document.querySelector('#mixExample').textContent=t.example;document.querySelector('#mixCatalogToggle').textContent=t.catalog;document.querySelector('#mixClose').textContent=t.close;document.querySelector('#catalogTitle').textContent=t.catalog;document.querySelector('#catalogDescription').textContent=lang==='fr'?'Les 118 éléments sont disponibles dans le mélangeur. Ce catalogue présente des exemples éducatifs de composés contenant deux éléments ou plus. Il ne peut pas recenser tous les composés et toutes les réactions chimiques ; une formule absente de la liste n’est pas nécessairement impossible.':lang==='en'?'All 118 elements are available in the mixer. This catalogue contains educational examples of compounds with two or more elements. It cannot list every compound or reaction; a formula missing from this list is not necessarily impossible.':'العناصر الـ118 متاحة في الخلاط. يعرض هذا الجدول أمثلة تعليمية لمركّبات تحتوي على عنصرين أو أكثر. لا يمكن حصر كل المركّبات والتفاعلات؛ وغياب صيغة من القائمة لا يعني أنها مستحيلة.';
+ document.querySelector('#mixCatalogSearch').placeholder=lang==='fr'?'Rechercher par formule, élément ou composé…':lang==='en'?'Search by formula, element, or compound…':'ابحث بالصيغة أو العنصر أو المركّب…';document.querySelector('#mixCatalogSearch').setAttribute('aria-label',lang==='fr'?'Rechercher dans le catalogue':lang==='en'?'Search the catalogue':'البحث في الجدول');
+ const headers=document.querySelectorAll('#mixerCatalog thead th');[t.formula,t.compound,t.atoms].forEach((x,i)=>{if(headers[i])headers[i].textContent=x});
+ const result=document.querySelector('#mixerResult');if(!result.dataset.hasResult)result.textContent=t.initial;
+ // Main controls stay translated; the periodic table's element names remain in French, matching its original content.
+ document.querySelector('#search').placeholder=lang==='fr'?'Nom, symbole, Z…':lang==='en'?'Name, symbol, atomic number…':'الاسم أو الرمز أو العدد الذري…';
+ document.querySelector('label[for="search"]').textContent=lang==='fr'?'Recherche élément':lang==='en'?'Search element':'البحث عن عنصر';
+ document.querySelector('label[for="state"]').textContent=lang==='fr'?'État physique':lang==='en'?'Physical state':'الحالة الفيزيائية';
+ document.querySelector('label[for="family"]').textContent=lang==='fr'?'Famille':lang==='en'?'Family':'العائلة';
+ document.querySelector('label[for="blockFilter"]').textContent=lang==='fr'?'Blocs (sous-couches)':lang==='en'?'Blocks (subshells)':'الكتل (المستويات الفرعية)';
+ const reset=document.querySelector('#reset');reset.textContent=lang==='fr'?'Réinitialiser':lang==='en'?'Reset':'إعادة ضبط';
+ const state=document.querySelector('#state');[lang==='fr'?'Tous les états':lang==='en'?'All states':'كل الحالات','Solide','Liquide',lang==='fr'?'Gaz':lang==='en'?'Gas':'غاز'].forEach((v,i)=>{if(state.options[i])state.options[i].textContent=lang==='en'?['All states','Solid','Liquid','Gas'][i]:lang==='ar'?['كل الحالات','صلب','سائل','غاز'][i]:v});
+ const fam=document.querySelector('#family');const familyLabels=lang==='fr'?['Toutes les familles','Alcalins','Alcalino-terreux','Métaux de transition','Non-métaux','Halogènes','Gaz nobles','Métaux pauvres','Métalloïdes','Lanthanides','Actinides']:lang==='en'?['All families','Alkali metals','Alkaline earth metals','Transition metals','Nonmetals','Halogens','Noble gases','Post-transition metals','Metalloids','Lanthanides','Actinides']:['كل العائلات','الفلزات القلوية','الفلزات القلوية الترابية','الفلزات الانتقالية','اللافلزات','الهالوجينات','الغازات النبيلة','الفلزات بعد الانتقالية','أشباه الفلزات','اللانثانيدات','الأكتينيدات'];familyLabels.forEach((v,i)=>{if(fam.options[i])fam.options[i].textContent=v});
+ const block=document.querySelector('#blockFilter');[lang==='fr'?'Tous les blocs (s, p, d, f)':lang==='en'?'All blocks (s, p, d, f)':'كل الكتل (s, p, d, f)','Bloc s','Bloc p','Bloc d','Bloc f'].forEach((v,i)=>{if(block.options[i])block.options[i].textContent=lang==='en'?['All blocks (s, p, d, f)','s block','p block','d block','f block'][i]:lang==='ar'?['كل الكتل (s, p, d, f)','كتلة s','كتلة p','كتلة d','كتلة f'][i]:v});
+ renderMixerSlots();renderMixerCatalog(document.querySelector('#mixCatalogSearch').value);
+}
+
+function populateElementSelect(id,defaultSymbol){
+ const select=document.getElementById(id);
+ select.innerHTML=elementList.map(([sym,name])=>`<option value="${sym}" ${sym===defaultSymbol?'selected':''}>${sym} — ${name}</option>`).join('');
+}
+let mixerSlotCount=2;
+function makeCountOptions(selected){return Array.from({length:12},(_,i)=>i+1).map(n=>`<option value="${n}" ${n===selected?'selected':''}>${n}</option>`).join('');}
+function renderMixerSlots(defaults){
+ const root=document.querySelector('#mixerSlots');
+ const existing=Array.from(root.querySelectorAll('.mixer-slot')).map(slot=>({sym:slot.querySelector('.mix-symbol')?.value||'H',count:Number(slot.querySelector('.mix-count')?.value||1)}));
+ const vals=defaults||existing;
+ root.innerHTML=Array.from({length:mixerSlotCount},(_,i)=>{
+  const sym=vals[i]?.sym||(i===0?'H':i===1?'O':'C'); const count=vals[i]?.count||(i===0?2:1);
+  const lang=currentLang||'fr'; const ui=languageText[lang]; const elementLabel=lang==='ar'?'العنصر':lang==='en'?'Element':'Élément'; const chooseLabel=lang==='ar'?'اختر العنصر':lang==='en'?'Choose element':'Choisir un élément'; const atomsLabel=lang==='ar'?'عدد الذرات':lang==='en'?'Number of atoms':'Nombre d’atomes'; const removeLabel=lang==='ar'?'حذف':lang==='en'?'Remove':'Supprimer';
+  return `<div class="mixer-slot" data-slot="${i}"><div class="slot-title"><span>${elementLabel} ${i+1}</span>${i>1?`<button class="slot-remove" type="button" data-remove="${i}" aria-label="${removeLabel} ${elementLabel.toLowerCase()} ${i+1}">${removeLabel} ×</button>`:''}</div><label for="mixSymbol${i}">${chooseLabel}</label><select id="mixSymbol${i}" class="mix-symbol" aria-label="${elementLabel} ${i+1}">${elementList.map(([s,n])=>`<option value="${s}" ${s===sym?'selected':''}>${s} — ${n}</option>`).join('')}</select><label for="mixCount${i}">${atomsLabel}</label><select id="mixCount${i}" class="mix-count">${makeCountOptions(count)}</select></div>`;
+ }).join('');
+ document.querySelector('#mixAddElement').disabled=mixerSlotCount>=6;
+ root.querySelectorAll('select').forEach(el=>el.addEventListener('change',()=>{}));
+ root.querySelectorAll('[data-remove]').forEach(btn=>btn.addEventListener('click',()=>{const idx=Number(btn.dataset.remove);const valsNow=getMixerSlots();valsNow.splice(idx,1);mixerSlotCount=Math.max(2,valsNow.length);renderMixerSlots(valsNow);runMixer();}));
+}
+function getMixerSlots(){return Array.from(document.querySelectorAll('#mixerSlots .mixer-slot')).map(slot=>({sym:slot.querySelector('.mix-symbol').value,count:Number(slot.querySelector('.mix-count').value)}));}
+renderMixerSlots([{sym:'H',count:2},{sym:'O',count:1}]);
+const mixerCompounds=[
+ {counts:{H:2,O:1},formula:'H₂O',name:'الماء (Eau)'},
+ {counts:{H:2,S:1},formula:'H₂S',name:'كبريتيد الهيدروجين (Sulfure d’hydrogène)'},
+ {counts:{H:1,Cl:1},formula:'HCl',name:'كلوريد الهيدروجين (Chlorure d’hydrogène)'},
+ {counts:{H:1,F:1},formula:'HF',name:'فلوريد الهيدروجين (Fluorure d’hydrogène)'},
+ {counts:{H:1,Br:1},formula:'HBr',name:'بروميد الهيدروجين (Bromure d’hydrogène)'},
+ {counts:{H:1,I:1},formula:'HI',name:'يوديد الهيدروجين (Iodure d’hydrogène)'},
+ {counts:{C:1,O:2},formula:'CO₂',name:'ثاني أكسيد الكربون (Dioxyde de carbone)'},
+ {counts:{C:1,O:1},formula:'CO',name:'أول أكسيد الكربون (Monoxyde de carbone)'},
+ {counts:{N:1,H:3},formula:'NH₃',name:'الأمونيا (Ammoniac)'},
+ {counts:{C:1,H:4},formula:'CH₄',name:'الميثان (Méthane)'},
+ {counts:{Na:1,Cl:1},formula:'NaCl',name:'كلوريد الصوديوم (ملح الطعام)'},
+ {counts:{Mg:1,O:1},formula:'MgO',name:'أكسيد المغنيسيوم (Oxyde de magnésium)'},
+ {counts:{S:1,O:2},formula:'SO₂',name:'ثاني أكسيد الكبريت (Dioxyde de soufre)'},
+ {counts:{S:1,O:3},formula:'SO₃',name:'ثالث أكسيد الكبريت (Trioxyde de soufre)'},
+ {counts:{N:1,O:1},formula:'NO',name:'أكسيد النيتريك (Monoxyde d’azote)'},
+ {counts:{N:1,O:2},formula:'NO₂',name:'ثاني أكسيد النيتروجين (Dioxyde d’azote)'},
+ {counts:{N:2,O:1},formula:'N₂O',name:'أكسيد النيتروز (Protoxyde d’azote)'},
+ {counts:{N:2,O:3},formula:'N₂O₃',name:'ثالث أكسيد ثنائي النيتروجين'},
+ {counts:{N:2,O:5},formula:'N₂O₅',name:'خماسي أكسيد ثنائي النيتروجين'},
+ {counts:{P:2,O:3},formula:'P₂O₃',name:'أكسيد الفوسفور (III) — صيغة مبسطة'},
+ {counts:{P:2,O:5},formula:'P₂O₅',name:'خامس أكسيد الفوسفور — صيغة تجريبية شائعة'},
+ {counts:{Ca:1,O:1},formula:'CaO',name:'أكسيد الكالسيوم (الجير الحي)'},
+ {counts:{Ca:1,Cl:2},formula:'CaCl₂',name:'كلوريد الكالسيوم'},
+ {counts:{Mg:1,Cl:2},formula:'MgCl₂',name:'كلوريد المغنيسيوم'},
+ {counts:{K:1,Cl:1},formula:'KCl',name:'كلوريد البوتاسيوم'},
+ {counts:{Li:1,F:1},formula:'LiF',name:'فلوريد الليثيوم'},
+ {counts:{Na:1,F:1},formula:'NaF',name:'فلوريد الصوديوم'},
+ {counts:{Na:2,O:1},formula:'Na₂O',name:'أكسيد الصوديوم'},
+ {counts:{K:2,O:1},formula:'K₂O',name:'أكسيد البوتاسيوم'},
+ {counts:{Al:2,O:3},formula:'Al₂O₃',name:'أكسيد الألومنيوم'},
+ {counts:{Fe:1,O:1},formula:'FeO',name:'أكسيد الحديد الثنائي'},
+ {counts:{Fe:2,O:3},formula:'Fe₂O₃',name:'أكسيد الحديد الثلاثي (الصدأ أحد مكوناته)'},
+ {counts:{Fe:3,O:4},formula:'Fe₃O₄',name:'أكسيد الحديد المغناطيسي'},
+ {counts:{Cu:1,O:1},formula:'CuO',name:'أكسيد النحاس الثنائي'},
+ {counts:{Cu:2,O:1},formula:'Cu₂O',name:'أكسيد النحاس الأحادي'},
+ {counts:{Zn:1,O:1},formula:'ZnO',name:'أكسيد الزنك'},
+ {counts:{Ag:1,Cl:1},formula:'AgCl',name:'كلوريد الفضة'},
+ {counts:{Ag:2,S:1},formula:'Ag₂S',name:'كبريتيد الفضة'},
+ {counts:{Zn:1,S:1},formula:'ZnS',name:'كبريتيد الزنك'},
+ {counts:{Fe:1,S:1},formula:'FeS',name:'كبريتيد الحديد الثنائي'},
+ {counts:{Pb:1,S:1},formula:'PbS',name:'كبريتيد الرصاص'},
+ {counts:{Ca:1,S:1},formula:'CaS',name:'كبريتيد الكالسيوم'},
+ {counts:{Si:1,O:2},formula:'SiO₂',name:'ثاني أكسيد السيليكون (الرمل/الكوارتز)'},
+ {counts:{Ti:1,O:2},formula:'TiO₂',name:'ثاني أكسيد التيتانيوم'},
+ {counts:{Mn:1,O:2},formula:'MnO₂',name:'ثاني أكسيد المنغنيز'},
+ {counts:{Cr:2,O:3},formula:'Cr₂O₃',name:'أكسيد الكروم الثلاثي'},
+ {counts:{Ba:1,S:1},formula:'BaS',name:'كبريتيد الباريوم'},
+ {counts:{Sr:1,O:1},formula:'SrO',name:'أكسيد السترونشيوم'},
+ {counts:{Ba:1,O:1},formula:'BaO',name:'أكسيد الباريوم'},
+ {counts:{B:2,O:3},formula:'B₂O₃',name:'أكسيد البورون'},
+ {counts:{Al:1,Cl:3},formula:'AlCl₃',name:'كلوريد الألومنيوم'},
+ {counts:{Fe:1,Cl:2},formula:'FeCl₂',name:'كلوريد الحديد الثنائي'},
+ {counts:{Fe:1,Cl:3},formula:'FeCl₃',name:'كلوريد الحديد الثلاثي'},
+ {counts:{P:1,Cl:3},formula:'PCl₃',name:'ثلاثي كلوريد الفوسفور'},
+ {counts:{P:1,Cl:5},formula:'PCl₅',name:'خماسي كلوريد الفوسفور'},
+ {counts:{C:1,S:2},formula:'CS₂',name:'ثاني كبريتيد الكربون'},
+ {counts:{Si:1,C:1},formula:'SiC',name:'كربيد السيليكون'},
+ {counts:{Ca:1,C:1},formula:'CaC₂',name:'كربيد الكالسيوم'},
+ {counts:{B:1,N:1},formula:'BN',name:'نيتريد البورون'},
+ {counts:{Si:3,N:4},formula:'Si₃N₄',name:'نيتريد السيليكون'},
+ {counts:{Na:3,N:1},formula:'Na₃N',name:'نيتريد الصوديوم (مركّب غير مستقر في الظروف العادية)'},
+ {counts:{C:6,H:12,O:6},formula:'C₆H₁₂O₆',name:'الجلوكوز (Glucose)'},
+ {counts:{N:3,H:12,P:1,O:4},formula:'(NH₄)₃PO₄',name:'فوسفات الأمونيوم (Ammonium phosphate)'},
+ {counts:{Ca:1,H:2,C:2,O:6},formula:'Ca(HCO₃)₂',name:'بيكربونات الكالسيوم (Calcium bicarbonate)'},
+ {counts:{Na:1,H:1,C:1,O:3},formula:'NaHCO₃',name:'بيكربونات الصوديوم (Baking soda)'},
+ {counts:{K:1,H:1,C:1,O:3},formula:'KHCO₃',name:'بيكربونات البوتاسيوم'},
+ {counts:{C:2,H:6,O:1},formula:'C₂H₆O',name:'الإيثانول (Ethanol)'},
+ {counts:{C:2,H:4,O:2},formula:'C₂H₄O₂',name:'حمض الخليك (Acetic acid)'},
+ {counts:{Ca:1,C:1,O:3},formula:'CaCO₃',name:'كربونات الكالسيوم (الحجر الجيري)'},
+ {counts:{Na:2,H:1,P:1,O:4},formula:'Na₂HPO₄',name:'فوسفات ثنائي الصوديوم الهيدروجينية'},
+ {counts:{Mg:1,H:2,C:1,O:6},formula:'Mg(HCO₃)₂',name:'بيكربونات المغنيسيوم'},
+ {counts:{C:12,H:22,O:11},formula:'C₁₂H₂₂O₁₁',name:'السكروز (Sucrose)'}
+];
+function mixerCounts(){
+ const slots=getMixerSlots(),counts={};
+ slots.forEach(({sym,count})=>counts[sym]=(counts[sym]||0)+count);
+ return {slots,counts};
+}
+function mixerFormula(counts){
+ const order=['C','H','N','O','P','S','F','Cl','Br','I'];
+ const keys=Object.keys(counts).sort((a,b)=>{
+  const ia=order.indexOf(a),ib=order.indexOf(b); if(ia<0&&ib<0)return a.localeCompare(b);if(ia<0)return 1;if(ib<0)return -1;return ia-ib;
+ });
+ return keys.map(sym=>sym+(mixerSubs[String(counts[sym])]||`₍${counts[sym]}₎`)).join('');
+}
+function moleculeVisual(counts){
+ const palette={H:'#f4f4f5',C:'#242424',N:'#3986ff',O:'#ff344f',S:'#ffd43b',P:'#ff9f43',Cl:'#39d98a',F:'#7cf7bd',Na:'#b8c5d6',Ca:'#a9b7ff',Fe:'#d47b52',Mg:'#9be3bb'};
+ const atoms=[];Object.entries(counts).forEach(([sym,n])=>{for(let i=0;i<n;i++)atoms.push(sym)});
+ const shown=atoms.slice(0,14),coords=[[160,84],[115,57],[205,57],[90,95],[230,95],[118,119],[202,119],[145,35],[175,35],[65,66],[255,66],[145,145],[175,145],[160,105]];
+ const lines=shown.slice(1).map((sym,i)=>{const a=coords[i],b=coords[i+1];return `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="#d6a5b2" stroke-width="5" stroke-linecap="round" opacity=".8"/>`}).join('');
+ const nodes=shown.map((sym,i)=>{const [x,y]=coords[i];const fill=palette[sym]||'#9ca3af';const dark=['H','S','F','Cl','Mg'].includes(sym);return `<g><circle cx="${x}" cy="${y}" r="17" fill="${fill}" stroke="#fff" stroke-opacity=".65" stroke-width="1.5"/><text x="${x}" y="${y+4}" text-anchor="middle" font-size="${sym.length>1?10:12}" font-weight="900" fill="${dark?'#111':'#fff'}">${sym}</text></g>`}).join('');
+ const visualLabel=currentLang==='fr'?'Illustration simplifiée des atomes':currentLang==='en'?'Simplified illustration of the atoms':'رسم توضيحي مبسّط للذرات'; const visualNote=currentLang==='fr'?'Illustration indicative, pas un modèle géométrique exact de la molécule.':currentLang==='en'?'Illustration only; not an exact geometric model of the molecule.':'رسم توضيحي تقريبي، وليس نموذجًا هندسيًا دقيقًا للجزيء.'; return `<div class="mixer-visual"><svg viewBox="0 0 320 170" role="img" aria-label="${visualLabel}">${lines}${nodes}</svg></div><div class="mixer-visual-note">${visualNote}</div>`;
+}
+function runMixer(){
+ const {slots,counts}=mixerCounts(),result=document.querySelector('#mixerResult');
+ const unique=Object.keys(counts).length,formula=mixerFormula(counts);
+ const found=mixerCompounds.find(c=>Object.keys(c.counts).length===unique&&Object.entries(c.counts).every(([k,v])=>counts[k]===v)&&Object.entries(counts).every(([k,v])=>c.counts[k]===v));
+ const composition=Object.entries(counts).map(([sym,n])=>`${sym} × ${n}`).join(' · '); result.dataset.hasResult='1'; const t=languageText[currentLang];
+ if(found){
+  result.innerHTML=`<div class="mixer-formula">${found.formula}</div><div class="mixer-ok"><b>✅ ${getCompoundName(found)}</b></div><div style="text-align:center;color:#ffd4dc">${composition}</div>${moleculeVisual(counts)}`;
+ }else if(unique===1&&counts.H===2){result.innerHTML=`<div class="mixer-formula">H₂</div><div class="mixer-ok"><b>${t.hydrogen}</b></div>${moleculeVisual(counts)}`;}
+ else if(unique===1&&counts.O===2){result.innerHTML=`<div class="mixer-formula">O₂</div><div class="mixer-ok"><b>${t.oxygen}</b></div>${moleculeVisual(counts)}`;}
+ else result.innerHTML=`<div class="mixer-formula">${formula}</div><div class="mixer-no"><b>${t.notFound}</b></div><div>${t.notFoundDesc}: ${composition}. ${t.notProof}</div>${moleculeVisual(counts)}`;
+}
+function renderMixerCatalog(query=''){
+ const body=document.querySelector('#mixCatalogBody'),q=query.trim().toLowerCase();
+ const rows=mixerCompounds.filter(c=>{
+  const syms=Object.keys(c.counts);const text=[c.formula,c.name,...syms,...syms.map(x=>elementNames[x]||x),...Object.values(c.counts)].join(' ').toLowerCase();return text.includes(q);
+ });
+ body.innerHTML=rows.map(c=>{
+  const composition=Object.entries(c.counts).map(([sym,n])=>`${sym} — ${elementNames[sym]||sym}: ${n}`).join(' · ');
+  return `<tr><td class="formula-cell">${c.formula}</td><td>${getCompoundName(c)}</td><td style="white-space:normal;min-width:180px">${composition}</td></tr>`;
+ }).join('')||`<tr><td colspan="3">${languageText[currentLang].searchEmpty}</td></tr>`;
+}
+renderMixerCatalog();
+const settingsPanel=document.querySelector('#settingsPanel');
+const settingsToggle=document.querySelector('#settingsToggle');
+const neonLevel=document.querySelector('#neonLevel');
+const neonValue=document.querySelector('#neonValue');
+const neonOff=document.querySelector('#neonOff');
+function applyNeon(level, disabled=false){
+ const safeLevel=Math.max(1,Math.min(100,Number(level)||1));
+ document.documentElement.style.setProperty('--neon-alpha',`${safeLevel}%`);
+ document.documentElement.style.setProperty('--neon-blur',`${(safeLevel/100*18).toFixed(1)}px`);
+ document.body.classList.toggle('neon-disabled',disabled);
+ neonLevel.value=String(safeLevel);neonValue.value=`${safeLevel}%`;neonValue.textContent=`${safeLevel}%`;
+ neonOff.setAttribute('aria-pressed',String(disabled));
+ const lang=document.querySelector('#siteLanguage').value;
+ neonOff.textContent=disabled?(lang==='ar'?'تشغيل النيون':lang==='en'?'Turn neon on':'Allumer le néon'):(lang==='ar'?'إطفاء النيون':lang==='en'?'Turn neon off':'Éteindre le néon');
+ store.set('tp-neon-level',String(safeLevel));store.set('tp-neon-off',String(disabled));
+}
+function setSettingsOpen(open){settingsPanel.hidden=!open;settingsToggle.setAttribute('aria-expanded',String(open));}
+settingsToggle.addEventListener('click',()=>setSettingsOpen(settingsPanel.hidden));
+document.querySelector('#settingsClose').addEventListener('click',()=>setSettingsOpen(false));
+document.addEventListener('click',e=>{if(!e.target.closest('.settings-anchor'))setSettingsOpen(false)});
+document.querySelector('#siteLanguage').addEventListener('change',e=>setLang(e.target.value));
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const THEME_COLORS={default:'#f1f5f9',red:'#16060b',blue:'#061323',black:'#000000',glass:'#0a1525'};
+function setTheme(t){if(!THEME_COLORS[t])t='default';document.body.dataset.theme=t;document.querySelectorAll('[data-theme-choice]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.themeChoice===t)));document.querySelector('meta[name="theme-color"]').content=THEME_COLORS[t];store.set('tp-theme',t);}
+function setLang(l){if(!languageText[l])l='fr';document.querySelector('#siteLanguage').value=l;applyLanguage(l);document.querySelector('#neonLevelLabel').textContent=l==='ar'?'قوة النيون':l==='en'?'Neon intensity':'Intensité du néon';document.querySelector('#neonOff').textContent=document.body.classList.contains('neon-disabled')?(l==='ar'?'تشغيل النيون':l==='en'?'Turn neon on':'Allumer le néon'):(l==='ar'?'إطفاء النيون':l==='en'?'Turn neon off':'Éteindre le néon');store.set('tp-lang',l);}
+document.querySelectorAll('[data-theme-choice]').forEach(b=>b.addEventListener('click',()=>setTheme(b.dataset.themeChoice)));
+neonLevel.addEventListener('input',()=>applyNeon(neonLevel.value,false));
+neonOff.addEventListener('click',()=>applyNeon(neonLevel.value,!document.body.classList.contains('neon-disabled')));
+setTheme(store.get('tp-theme')||'default');
+setLang(store.get('tp-lang')||'fr');
+applyNeon(store.get('tp-neon-level')||22,store.get('tp-neon-off')==='true');
+document.querySelector('#mixerLaunch').addEventListener('click',()=>{mixerPanel.classList.toggle('hidden');if(!mixerPanel.classList.contains('hidden'))mixerPanel.scrollIntoView({behavior:'smooth',block:'center'});});
+document.querySelector('#mixAddElement').addEventListener('click',()=>{if(mixerSlotCount>=6)return;const vals=getMixerSlots();vals.push({sym:'C',count:1});mixerSlotCount++;renderMixerSlots(vals);});
+document.querySelector('#mixCheck').addEventListener('click',runMixer);
+document.querySelector('#mixExample').addEventListener('click',()=>{mixerSlotCount=2;renderMixerSlots([{sym:'H',count:2},{sym:'O',count:1}]);runMixer();});
+document.querySelector('#mixCatalogToggle').addEventListener('click',()=>{const cat=document.querySelector('#mixerCatalog');cat.classList.toggle('hidden');if(!cat.classList.contains('hidden'))cat.scrollIntoView({behavior:'smooth',block:'nearest'});});
+document.querySelector('#mixCatalogSearch').addEventListener('input',e=>renderMixerCatalog(e.target.value));
+document.querySelector('#mixClose').addEventListener('click',()=>mixerPanel.classList.add('hidden'));
+
+</script>
+</body>
+</html>
