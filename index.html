@@ -1285,8 +1285,7 @@ function shuffle(arr){const out=[...arr];for(let i=out.length-1;i>0;i--){const j
 
 function setCategory(key,title){
  currentCategory=quizCategories[key]?key:'subatomic';
- document.querySelector('#quizCategoryLabel').textContent=`Jeu : ${title||quizCategories[currentCategory].label}`;
- document.querySelector('#activeGameTitle').textContent='🎯 '+(title||quizCategories[currentCategory].label);
+ const qLang=currentLang||'fr';document.querySelector('#quizCategoryLabel').textContent=(qLang==='ar'?'اللعبة: ':qLang==='en'?'Game: ':'Jeu : ')+(title||quizCategories[currentCategory].label);document.querySelector('#activeGameTitle').textContent=qLang==='ar'?'🎯 وضع الاختبار':qLang==='en'?'🎯 Quiz Mode':'🎯 Mode Quiz';
  startQuiz();
 }
 
@@ -1294,30 +1293,209 @@ function startQuiz(){
  const bank=quizCategories[currentCategory].questions;
  quizOrder=shuffle(bank).slice(0,Math.min(10,bank.length));
  quizIndex=0;quizScore=0;quizAnswered=false;
- document.querySelector('#quizScore').textContent='⭐ Score: 0';
- document.querySelector('#quizNext').textContent='Question Suivante →';
+ document.querySelector('#quizScore').textContent=(currentLang==='ar'?'⭐ النتيجة: 0':currentLang==='en'?'⭐ Score: 0':'⭐ Score: 0');
+ document.querySelector('#quizNext').textContent=currentLang==='ar'?'السؤال التالي ←':currentLang==='en'?'Next Question →':'Question Suivante →';
  renderQuestion();
 }
 
+function localizeQuizText(text){
+ if(currentLang==='fr') return text;
+ const en={
+ "La masse de l'atome est concentrée principalement dans :":"The mass of an atom is mainly concentrated in:",
+ "Les particules de charge négative qui tournent autour du noyau sont :":"The negatively charged particles that move around the nucleus are:",
+ "L'atome est électriquement neutre à l'état fondamental car :":"An atom is electrically neutral because:",
+ "Les particules neutres situées à l'intérieur du noyau sont :":"The neutral particles inside the nucleus are:",
+ "Quelle particule porte une charge positive ?":"Which particle has a positive charge?",
+ "Quelle particule a une masse très faible par rapport au proton ?":"Which particle has a much smaller mass than a proton?",
+ "Où se trouvent les protons et les neutrons ?":"Where are protons and neutrons found?",
+ "Dans un atome neutre qui possède 8 protons, combien y a-t-il d’électrons ?":"How many electrons are in a neutral atom with 8 protons?",
+ "Comment appelle-t-on la région autour du noyau où se trouvent les électrons ?":"What is the region around the nucleus where electrons are found called?",
+ "Quelle particule détermine la charge positive du noyau ?":"Which particle determines the positive charge of the nucleus?",
+ "La couche électronique la plus proche du noyau et de plus basse énergie est :":"The electron shell closest to the nucleus and with the lowest energy is:",
+ "La configuration électronique du Néon (10Ne) est :":"The electron configuration of Neon (10Ne) is:",
+ "Le nombre maximal d'électrons dans la couche M pour les 20 premiers éléments est :":"The maximum number of electrons in shell M for the first 20 elements is:",
+ "L'élément Magnesium (12Mg) a une répartition électronique de :":"The electron distribution of Magnesium (12Mg) is:",
+ "Combien d’électrons la couche K peut-elle contenir au maximum ?":"What is the maximum number of electrons shell K can hold?",
+ "La répartition électronique de l’oxygène (Z = 8) est :":"The electron distribution of oxygen (Z = 8) is:",
+ "Combien d’électrons possède un atome neutre de sodium (Z = 11) ?":"How many electrons does a neutral sodium atom (Z = 11) have?",
+ "Quelle couche vient juste après la couche L ?":"Which shell comes immediately after shell L?",
+ "La répartition électronique du carbone (Z = 6) est :":"The electron distribution of carbon (Z = 6) is:",
+ "Combien d’électrons externes possède le chlore (2 , 8 , 7) ?":"How many outer-shell electrons does chlorine (2, 8, 7) have?",
+ "Le symbole chimique du Sodium (Na) provient de son nom latin :":"The chemical symbol for sodium (Na) comes from its Latin name:",
+ "Le symbole chimique du Potassium (K) provient du mot latin :":"The chemical symbol for potassium (K) comes from the Latin word:",
+ "Pourquoi certains symboles s'écrivent avec deux lettres (ex: Si, Cl) ?":"Why are some chemical symbols written with two letters (e.g., Si, Cl)?",
+ "Le symbole de l'élément Aluminium selon le livre du Ministère est :":"According to the ministry textbook, the symbol for aluminium is:",
+ "Quel est le symbole chimique du fer ?":"What is the chemical symbol for iron?",
+ "Quel élément possède le symbole Cu ?":"Which element has the symbol Cu?",
+ "Quel est le symbole chimique de l’or ?":"What is the chemical symbol for gold?",
+ "Quel est le symbole chimique de l’argent ?":"What is the chemical symbol for silver?",
+ "Dans le symbole Cl, quelle lettre est en majuscule ?":"In the symbol Cl, which letter is uppercase?",
+ "Quel élément correspond au symbole K ?":"Which element corresponds to the symbol K?",
+ "Le nombre atomique (Z) représente le nombre de :":"The atomic number (Z) represents the number of:",
+ "Le nombre massique (A) d’un atome de Sodium (11 protons, 12 neutrons) est :":"The mass number (A) of a sodium atom (11 protons, 12 neutrons) is:",
+ "Comment calcule-t-on le nombre de neutrons dans un noyau ?":"How do we calculate the number of neutrons in a nucleus?",
+ "Si le nombre atomique est 17 et le nombre massique est 35 (Chlore), les neutrons sont :":"If the atomic number is 17 and the mass number is 35 (chlorine), the number of neutrons is:",
+ "Un atome contient 6 protons et 6 neutrons. Son nombre massique A est :":"An atom contains 6 protons and 6 neutrons. Its mass number A is:",
+ "Un atome a Z = 9 et A = 19. Combien possède-t-il de neutrons ?":"An atom has Z = 9 and A = 19. How many neutrons does it have?",
+ "Quel symbole représente le nombre atomique ?":"Which symbol represents the atomic number?",
+ "Quel symbole représente le nombre massique ?":"Which symbol represents the mass number?",
+ "Un atome neutre possède 13 protons. Combien possède-t-il d’électrons ?":"A neutral atom has 13 protons. How many electrons does it have?",
+ "Un noyau contient 17 protons et 18 neutrons. Son nombre massique est :":"A nucleus contains 17 protons and 18 neutrons. Its mass number is:",
+ "Dans le tableau périodique moderne, les éléments sont rangés par ordre croissant de :":"In the modern periodic table, elements are arranged in increasing order of:",
+ "Les lignes horizontales du tableau périodique sont appelées :":"The horizontal rows of the periodic table are called:",
+ "Les colonnes verticales du tableau périodique sont appelées :":"The vertical columns of the periodic table are called:",
+ "Tous les éléments d’une même période ont le même nombre de :":"All elements in the same period have the same number of:",
+ "Combien de périodes horizontales compte le tableau périodique ?":"How many horizontal periods are in the periodic table?",
+ "Combien de groupes verticaux compte le tableau périodique moderne ?":"How many vertical groups are in the modern periodic table?",
+ "Quel est le numéro atomique de l’hydrogène ?":"What is the atomic number of hydrogen?",
+ "Quel élément vient juste après le carbone (Z = 6) ?":"Which element comes immediately after carbon (Z = 6)?",
+ "Les éléments d’un même groupe ont souvent des propriétés chimiques :":"Elements in the same group often have chemical properties that are:",
+ "Quel renseignement donne le numéro atomique d’un élément ?":"What information does an element's atomic number provide?",
+ "L'élément 12Mg (2, 8, 2) se situe dans la période :":"Element 12Mg (2, 8, 2) is in period:",
+ "Un élément ayant 7 électrons dans sa couche externe appartient au groupe :":"An element with 7 outer-shell electrons belongs to group:",
+ "L'élément Calcium (20Ca: 2, 8, 8, 2) appartient au groupe :":"Calcium (20Ca: 2, 8, 8, 2) belongs to group:",
+ "L'élément Argon (18Ar: 2, 8, 8) se situe dans la période :":"Argon (18Ar: 2, 8, 8) is in period:",
+ "Un élément qui possède deux couches électroniques occupées est dans la période :":"An element with two occupied electron shells is in period:",
+ "Le néon a la répartition 2 , 8. Dans quelle période se trouve-t-il ?":"Neon has the distribution 2, 8. Which period is it in?",
+ "Un élément possède un électron sur sa couche externe. Il est généralement dans le groupe :":"An element with one outer-shell electron is generally in group:",
+ "Le magnésium (2 , 8 , 2) possède combien de couches occupées ?":"How many occupied shells does magnesium (2, 8, 2) have?",
+ "Quelle information permet de trouver la période à partir de la répartition électronique ?":"Which information lets you determine the period from the electron distribution?",
+ "Le lithium (2 , 1) appartient à quelle période ?":"Which period does lithium (2, 1) belong to?",
+ "Les éléments du Groupe 1 (1A) sont appelés :":"Elements in Group 1 (1A) are called:",
+ "Les éléments du Groupe 17 (7A) sont appelés :":"Elements in Group 17 (7A) are called:",
+ "Les éléments du Groupe 18 caractérisés par une couche externe saturée sont :":"Group 18 elements, characterized by a full outer shell, are:",
+ "Quel gaz noble possède seulement 2 électrons au total ?":"Which noble gas has only 2 electrons in total?",
+ "Le sodium (Na) appartient à quelle famille ?":"Which family does sodium (Na) belong to?",
+ "Quel élément est un halogène ?":"Which element is a halogen?",
+ "Quel élément est un gaz noble ?":"Which element is a noble gas?",
+ "Le calcium (Ca) appartient à la famille des :":"Calcium (Ca) belongs to the family of:",
+ "À température ambiante, quel élément est liquide ?":"Which element is liquid at room temperature?",
+ "Les éléments d’une même famille chimique se trouvent principalement dans la même :":"Elements in the same chemical family are mainly found in the same:",
+ "Le noyau de l'atome est de charge positive à cause de la présence de :":"The atomic nucleus is positively charged because it contains:",
+ "Quel est l'élément qui ne participe pas aux réactions chimiques dans les conditions normales ?":"Which element does not take part in chemical reactions under normal conditions?",
+ "Quelle particule détermine le numéro atomique Z ?":"Which particle determines the atomic number Z?",
+ "Quelle particule possède une charge électrique négative ?":"Which particle has a negative electric charge?",
+ "Quelle particule n’a pas de charge électrique ?":"Which particle has no electric charge?",
+ "Où se trouve presque toute la masse de l’atome ?":"Where is almost all the mass of an atom found?",
+ "Dans le tableau périodique, les groupes sont-ils horizontaux ou verticaux ?":"In the periodic table, are groups horizontal or vertical?",
+ "Dans le tableau périodique, les périodes sont-elles horizontales ou verticales ?":"In the periodic table, are periods horizontal or vertical?",
+ "Quel élément possède le symbole O ?":"Which element has the symbol O?",
+ "Quel est le nombre de protons dans un atome de magnésium (Z = 12) ?":"How many protons are in a magnesium atom (Z = 12)?",
+ "Quel élément possède une seule couche électronique occupée et Z = 2 ?":"Which element has one occupied electron shell and Z = 2?",
+ "Quel élément a la répartition électronique 2 , 8 ?":"Which element has the electron distribution 2, 8?"
+ };
+ const ar={
+ "La masse de l'atome est concentrée principalement dans :":"تتركز كتلة الذرة بشكل أساسي في:",
+ "Les particules de charge négative qui tournent autour du noyau sont :":"الجسيمات سالبة الشحنة التي تتحرك حول النواة هي:",
+ "L'atome est électriquement neutre à l'état fondamental car :":"تكون الذرة متعادلة كهربائيًا لأن:",
+ "Les particules neutres situées à l'intérieur du noyau sont :":"الجسيمات المتعادلة الموجودة داخل النواة هي:",
+ "Quelle particule porte une charge positive ?":"أي جسيم يحمل شحنة موجبة؟",
+ "Quelle particule a une masse très faible par rapport au proton ?":"أي جسيم كتلته صغيرة جدًا مقارنة بالبروتون؟",
+ "Où se trouvent les protons et les neutrons ?":"أين توجد البروتونات والنيوترونات؟",
+ "Dans un atome neutre qui possède 8 protons, combien y a-t-il d’électrons ?":"كم إلكترونًا توجد في ذرة متعادلة تحتوي على ٨ بروتونات؟",
+ "Comment appelle-t-on la région autour du noyau où se trouvent les électrons ?":"ما اسم المنطقة المحيطة بالنواة التي توجد فيها الإلكترونات؟",
+ "Quelle particule détermine la charge positive du noyau ?":"أي جسيم يحدد الشحنة الموجبة للنواة؟",
+ "La couche électronique la plus proche du noyau et de plus basse énergie est :":"غلاف الإلكترونات الأقرب إلى النواة والأقل طاقة هو:",
+ "La configuration électronique du Néon (10Ne) est :":"التوزيع الإلكتروني للنيون (10Ne) هو:",
+ "Le nombre maximal d'électrons dans la couche M pour les 20 premiers éléments est :":"أقصى عدد من الإلكترونات في الغلاف M للعناصر العشرين الأولى هو:",
+ "L'élément Magnesium (12Mg) a une répartition électronique de :":"التوزيع الإلكتروني للمغنيسيوم (12Mg) هو:",
+ "Combien d’électrons la couche K peut-elle contenir au maximum ?":"ما أقصى عدد من الإلكترونات يمكن أن يستوعبه الغلاف K؟",
+ "La répartition électronique de l’oxygène (Z = 8) est :":"التوزيع الإلكتروني للأكسجين (Z = 8) هو:",
+ "Combien d’électrons possède un atome neutre de sodium (Z = 11) ?":"كم إلكترونًا في ذرة صوديوم متعادلة (Z = 11)؟",
+ "Quelle couche vient juste après la couche L ?":"أي غلاف يأتي مباشرة بعد الغلاف L؟",
+ "La répartition électronique du carbone (Z = 6) est :":"التوزيع الإلكتروني للكربون (Z = 6) هو:",
+ "Combien d’électrons externes possède le chlore (2 , 8 , 7) ?":"كم إلكترونًا خارجيًا يمتلك الكلور (2، 8، 7)؟",
+ "Le symbole chimique du Sodium (Na) provient de son nom latin :":"يأتي الرمز الكيميائي للصوديوم (Na) من اسمه اللاتيني:",
+ "Le symbole chimique du Potassium (K) provient du mot latin :":"يأتي الرمز الكيميائي للبوتاسيوم (K) من الكلمة اللاتينية:",
+ "Pourquoi certains symboles s'écrivent avec deux lettres (ex: Si, Cl) ?":"لماذا تُكتب بعض الرموز بحرفين (مثل Si وCl)؟",
+ "Le symbole de l'élément Aluminium selon le livre du Ministère est :":"رمز عنصر الألومنيوم حسب كتاب الوزارة هو:",
+ "Quel est le symbole chimique du fer ?":"ما الرمز الكيميائي للحديد؟",
+ "Quel élément possède le symbole Cu ?":"أي عنصر رمزه Cu؟",
+ "Quel est le symbole chimique de l’or ?":"ما الرمز الكيميائي للذهب؟",
+ "Quel est le symbole chimique de l’argent ?":"ما الرمز الكيميائي للفضة؟",
+ "Dans le symbole Cl, quelle lettre est en majuscule ?":"في الرمز Cl، أي حرف مكتوب بحرف كبير؟",
+ "Quel élément correspond au symbole K ?":"أي عنصر يقابله الرمز K؟",
+ "Le nombre atomique (Z) représente le nombre de :":"العدد الذري (Z) يمثل عدد:",
+ "Le nombre massique (A) d’un atome de Sodium (11 protons, 12 neutrons) est :":"العدد الكتلي (A) لذرة صوديوم بها ١١ بروتونًا و١٢ نيوترونًا هو:",
+ "Comment calcule-t-on le nombre de neutrons dans un noyau ?":"كيف نحسب عدد النيوترونات في النواة؟",
+ "Si le nombre atomique est 17 et le nombre massique est 35 (Chlore), les neutrons sont :":"إذا كان العدد الذري ١٧ والعدد الكتلي ٣٥ (الكلور)، فإن عدد النيوترونات هو:",
+ "Un atome contient 6 protons et 6 neutrons. Son nombre massique A est :":"تحتوي ذرة على ٦ بروتونات و٦ نيوترونات. ما عددها الكتلي A؟",
+ "Un atome a Z = 9 et A = 19. Combien possède-t-il de neutrons ?":"ذرة عددها الذري Z = 9 والكتلي A = 19. كم نيوترونًا بها؟",
+ "Quel symbole représente le nombre atomique ?":"ما الرمز الذي يمثل العدد الذري؟",
+ "Quel symbole représente le nombre massique ?":"ما الرمز الذي يمثل العدد الكتلي؟",
+ "Un atome neutre possède 13 protons. Combien possède-t-il d’électrons ?":"ذرة متعادلة بها ١٣ بروتونًا. كم إلكترونًا بها؟",
+ "Un noyau contient 17 protons et 18 neutrons. Son nombre massique est :":"تحتوي نواة على ١٧ بروتونًا و١٨ نيوترونًا. ما عددها الكتلي؟",
+ "Dans le tableau périodique moderne, les éléments sont rangés par ordre croissant de :":"في الجدول الدوري الحديث، تُرتب العناصر تصاعديًا حسب:",
+ "Les lignes horizontales du tableau périodique sont appelées :":"تُسمى الصفوف الأفقية في الجدول الدوري:",
+ "Les colonnes verticales du tableau périodique sont appelées :":"تُسمى الأعمدة الرأسية في الجدول الدوري:",
+ "Tous les éléments d’une même période ont le même nombre de :":"تمتلك جميع عناصر الدورة نفسها العدد نفسه من:",
+ "Combien de périodes horizontales compte le tableau périodique ?":"كم دورة أفقية في الجدول الدوري؟",
+ "Combien de groupes verticaux compte le tableau périodique moderne ?":"كم مجموعة رأسية في الجدول الدوري الحديث؟",
+ "Quel est le numéro atomique de l’hydrogène ?":"ما العدد الذري للهيدروجين؟",
+ "Quel élément vient juste après le carbone (Z = 6) ?":"أي عنصر يأتي مباشرة بعد الكربون (Z = 6)؟",
+ "Les éléments d’un même groupe ont souvent des propriétés chimiques :":"غالبًا ما تكون الخصائص الكيميائية لعناصر المجموعة الواحدة:",
+ "Quel renseignement donne le numéro atomique d’un élément ?":"ما المعلومة التي يعطيها العدد الذري للعنصر؟",
+ "L'élément 12Mg (2, 8, 2) se situe dans la période :":"يقع العنصر 12Mg (2، 8، 2) في الدورة:",
+ "Un élément ayant 7 électrons dans sa couche externe appartient au groupe :":"ينتمي العنصر الذي لديه ٧ إلكترونات في غلافه الخارجي إلى المجموعة:",
+ "L'élément Calcium (20Ca: 2, 8, 8, 2) appartient au groupe :":"ينتمي الكالسيوم (20Ca: 2، 8، 8، 2) إلى المجموعة:",
+ "L'élément Argon (18Ar: 2, 8, 8) se situe dans la période :":"يقع الأرجون (18Ar: 2، 8، 8) في الدورة:",
+ "Un élément qui possède deux couches électroniques occupées est dans la période :":"العنصر الذي لديه غلافان إلكترونيان مشغولان يقع في الدورة:",
+ "Le néon a la répartition 2 , 8. Dans quelle période se trouve-t-il ?":"توزيع النيون هو ٢، ٨. في أي دورة يقع؟",
+ "Un élément possède un électron sur sa couche externe. Il est généralement dans le groupe :":"العنصر الذي لديه إلكترون واحد في غلافه الخارجي يوجد عادةً في المجموعة:",
+ "Le magnésium (2 , 8 , 2) possède combien de couches occupées ?":"كم غلافًا مشغولًا لدى المغنيسيوم (٢، ٨، ٢)؟",
+ "Quelle information permet de trouver la période à partir de la répartition électronique ?":"ما المعلومة التي تساعد على تحديد الدورة من التوزيع الإلكتروني؟",
+ "Le lithium (2 , 1) appartient à quelle période ?":"إلى أي دورة ينتمي الليثيوم (٢، ١)؟",
+ "Les éléments du Groupe 1 (1A) sont appelés :":"تُسمى عناصر المجموعة ١ (1A):",
+ "Les éléments du Groupe 17 (7A) sont appelés :":"تُسمى عناصر المجموعة ١٧ (7A):",
+ "Les éléments du Groupe 18 caractérisés par une couche externe saturée sont :":"عناصر المجموعة ١٨ التي تتميز بغلاف خارجي مكتمل هي:",
+ "Quel gaz noble possède seulement 2 électrons au total ?":"أي غاز نبيل لديه إلكترونان فقط إجمالًا؟",
+ "Le sodium (Na) appartient à quelle famille ?":"إلى أي عائلة ينتمي الصوديوم (Na)؟",
+ "Quel élément est un halogène ?":"أي عنصر من الهالوجينات؟",
+ "Quel élément est un gaz noble ?":"أي عنصر غاز نبيل؟",
+ "Le calcium (Ca) appartient à la famille des :":"ينتمي الكالسيوم (Ca) إلى عائلة:",
+ "À température ambiante, quel élément est liquide ?":"أي عنصر يكون سائلًا في درجة حرارة الغرفة؟",
+ "Les éléments d’une même famille chimique se trouvent principalement dans la même :":"توجد عناصر العائلة الكيميائية نفسها غالبًا في:",
+ "Le noyau de l'atome est de charge positive à cause de la présence de :":"نواة الذرة موجبة الشحنة بسبب وجود:",
+ "Quel est l'élément qui ne participe pas aux réactions chimiques dans les conditions normales ?":"أي عنصر لا يشارك في التفاعلات الكيميائية في الظروف العادية؟",
+ "Quelle particule détermine le numéro atomique Z ?":"أي جسيم يحدد العدد الذري Z؟",
+ "Quelle particule possède une charge électrique négative ?":"أي جسيم يحمل شحنة كهربائية سالبة؟",
+ "Quelle particule n’a pas de charge électrique ?":"أي جسيم ليس له شحنة كهربائية؟",
+ "Où se trouve presque toute la masse de l’atome ?":"أين توجد تقريبًا كل كتلة الذرة؟",
+ "Dans le tableau périodique, les groupes sont-ils horizontaux ou verticaux ?":"في الجدول الدوري، هل المجموعات أفقية أم رأسية؟",
+ "Dans le tableau périodique, les périodes sont-elles horizontales ou verticales ?":"في الجدول الدوري، هل الدورات أفقية أم رأسية؟",
+ "Quel élément possède le symbole O ?":"أي عنصر رمزه O؟",
+ "Quel est le nombre de protons dans un atome de magnésium (Z = 12) ?":"كم بروتونًا في ذرة مغنيسيوم (Z = 12)؟",
+ "Quel élément possède une seule couche électronique occupée et Z = 2 ?":"أي عنصر لديه غلاف إلكتروني مشغول واحد وZ = 2؟",
+ "Quel élément a la répartition électronique 2 , 8 ?":"أي عنصر توزيعه الإلكتروني ٢، ٨؟"
+ };
+ const map=currentLang==='ar'?ar:en;
+ if(map[text]) return map[text];
+ const replacements=currentLang==='ar' ? [
+ ['Métaux Alcalins','الفلزات القلوية'],['Métaux alcalins','الفلزات القلوية'],['Alcalino-terreux','الفلزات القلوية الترابية'],['Gaz Nobles / Inertes','الغازات النبيلة / الخاملة'],['Gaz nobles','الغازات النبيلة'],['Gaz nobles','الغازات النبيلة'],['Halogènes','الهالوجينات'],['Période','الدورة'],['Groupe','المجموعة'],['Protons','البروتونات'],['protons','البروتونات'],['Neutrons','النيوترونات'],['neutrons','النيوترونات'],['Électrons','الإلكترونات'],['électrons','الإلكترونات'],['électron','إلكترون'],['électrons','الإلكترونات'],['Le noyau','النواة'],['noyau','النواة'],['Nombre atomique','العدد الذري'],['nombre atomique','العدد الذري'],['Nombre massique','العدد الكتلي'],['nombre massique','العدد الكتلي'],['électronique','إلكتروني'],['répartition','توزيع'],['Symbole chimique','الرمز الكيميائي'],['symbole chimique','الرمز الكيميائي'],['Magnésium','المغنيسيوم'],['Sodium','الصوديوم'],['Potassium','البوتاسيوم'],['Carbone','الكربون'],['Oxygène','الأكسجين'],['Hydrogène','الهيدروجين'],['Chlore','الكلور'],['Néon','النيون'],['Hélium','الهيليوم'],['Calcium','الكالسيوم'],['Argon','الأرجون'],['Brome','البروم'],['Fluor','الفلور'],['Lithium','الليثيوم'],['Cuivre','النحاس'],['fer','الحديد'],['or','الذهب'],['argent','الفضة'],['Périodes','الدورات'],['Groupes','المجموعات'],['Verticales','رأسية'],['Horizontales','أفقية'],['Dans','في'],['Quelle','ما'],['Quel','أي'],['Combien','كم'],['atome','ذرة'],['Atome','ذرة'],['élément','عنصر'],['éléments','عناصر'],['charge positive','شحنة موجبة'],['charge négative','شحنة سالبة'],['nulle','صفرية'],['2 électrons','إلكترونان'],['électrons','إلكترونات'],['protons','بروتونات'],['neutrons','نيوترونات'],['couche','غلاف'],['couches','أغلفة'],['famille','عائلة'],['même','نفس'],['nombre','عدد'],['masse','كتلة'],['est :','هو:'],['sont :','هي:'],['Le ','ال'],[' la ',' ال'],[' de ',' من ']
+ ] : [
+ ['Métaux Alcalins','Alkali metals'],['Métaux alcalins','Alkali metals'],['Alcalino-terreux','Alkaline earth metals'],['Gaz Nobles / Inertes','Noble / inert gases'],['Gaz nobles','Noble gases'],['Halogènes','Halogens'],['Période','Period'],['Groupe','Group'],['Protons','Protons'],['protons','protons'],['Neutrons','Neutrons'],['neutrons','neutrons'],['Électrons','Electrons'],['électrons','electrons'],['électron','electron'],['Le noyau','The nucleus'],['noyau','nucleus'],['Nombre atomique','Atomic number'],['nombre atomique','atomic number'],['Nombre massique','Mass number'],['nombre massique','mass number'],['électronique','electron'],['répartition','distribution'],['Symbole chimique','Chemical symbol'],['symbole chimique','chemical symbol'],['Magnésium','Magnesium'],['Sodium','Sodium'],['Potassium','Potassium'],['Carbone','Carbon'],['Oxygène','Oxygen'],['Hydrogène','Hydrogen'],['Chlore','Chlorine'],['Néon','Neon'],['Hélium','Helium'],['Calcium','Calcium'],['Argon','Argon'],['Brome','Bromine'],['Fluor','Fluorine'],['Lithium','Lithium'],['Cuivre','Copper'],['fer','iron'],['or','gold'],['argent','silver'],['Périodes','Periods'],['Groupes','Groups'],['Verticales','Vertical'],['Horizontales','Horizontal'],['atome','atom'],['Atome','Atom'],['élément','element'],['éléments','elements'],['charge positive','positive charge'],['charge négative','negative charge'],['couche','shell'],['couches','shells'],['famille','family'],['même','same'],['nombre','number'],['masse','mass'],['Quelle','Which'],['Quel','Which'],['Combien','How many'],['est :','is:'],['sont :','are:']
+ ];
+ let out=text; for(const [a,b] of replacements) out=out.split(a).join(b); return out;
+}
 function renderQuestion(){
  quizAnswered=false;
  if(quizIndex>=quizOrder.length){
- qEl.textContent=`🏆 Résultat Final: Vous avez obtenu ${quizScore} sur ${quizOrder.length * 10} points !`;
+ qEl.textContent=currentLang==='ar'?`🏆 النتيجة النهائية: حصلت على ${quizScore} من ${quizOrder.length * 10} نقطة!`:currentLang==='en'?`🏆 Final result: You scored ${quizScore} out of ${quizOrder.length * 10} points!`:`🏆 Résultat Final: Vous avez obtenu ${quizScore} sur ${quizOrder.length * 10} points !`;
  answersEl.innerHTML='';
- document.querySelector('#quizFeedback').textContent='Bravo ! Excellente révision des leçons 1 et 2.';
+ document.querySelector('#quizFeedback').textContent=currentLang==='ar'?'أحسنت! مراجعة ممتازة للدرسين الأول والثاني.':currentLang==='en'?'Great job! Excellent review of lessons 1 and 2.':'Bravo ! Excellente révision des leçons 1 et 2.';
  document.querySelector('#quizProgress').style.width='100%';
- document.querySelector('#quizNext').textContent='Recommencer le Jeu ↻';
+ document.querySelector('#quizNext').textContent=currentLang==='ar'?'إعادة اللعبة ↻':currentLang==='en'?'Restart Game ↻':'Recommencer le Jeu ↻';
  return;
  }
  const item=quizOrder[quizIndex];
- document.querySelector('#quizRound').textContent=`Question ${quizIndex+1} / ${quizOrder.length}`;
+ document.querySelector('#quizRound').textContent=`${currentLang==='ar'?'السؤال':currentLang==='en'?'Question':'Question'} ${quizIndex+1} / ${quizOrder.length}`;
  document.querySelector('#quizProgress').style.width=`${(quizIndex/quizOrder.length)*100}%`;
- qEl.textContent=item.q;
- document.querySelector('#quizFeedback').textContent='Choisissez la bonne réponse.';
+ qEl.textContent=localizeQuizText(item.q);
+ document.querySelector('#quizFeedback').textContent=currentLang==='ar'?'اختر الإجابة الصحيحة.':currentLang==='en'?'Choose the correct answer.':'Choisissez la bonne réponse.';
  answersEl.innerHTML='';
  shuffle(item.opts).forEach(opt=>{
  const b=document.createElement('button');
- b.type='button';b.className='quiz-answer';b.textContent=opt;
+ b.type='button';b.className='quiz-answer';b.textContent=localizeQuizText(opt); b.dataset.originalOption=opt;
  b.addEventListener('click',()=>answerQuiz(opt,b));
  answersEl.appendChild(b);
  });
@@ -1327,20 +1505,20 @@ function answerQuiz(opt,button){
  if(quizAnswered)return;
  quizAnswered=true;
  const item=quizOrder[quizIndex],correct=opt===item.a;
- [...answersEl.children].forEach(b=>{b.disabled=true;if(b.textContent===item.a)b.classList.add('correct')});
+ [...answersEl.children].forEach(b=>{b.disabled=true;if(b.dataset.originalOption===item.a)b.classList.add('correct')});
  if(!correct)button.classList.add('wrong');
  if(correct){
  quizScore+=10;
- document.querySelector('#quizScore').textContent=`⭐ Score: ${quizScore}`;
- document.querySelector('#quizFeedback').textContent='✅ Bonne réponse ! '+item.why;
+ document.querySelector('#quizScore').textContent=`${currentLang==='ar'?'⭐ النتيجة: ': '⭐ Score: '}${quizScore}`;
+ document.querySelector('#quizFeedback').textContent=(currentLang==='ar'?'✅ إجابة صحيحة! ':currentLang==='en'?'✅ Correct answer! ':'✅ Bonne réponse ! ')+localizeQuizText(item.why);
  }else{
- document.querySelector('#quizFeedback').textContent='❌ Mauvaise réponse ! La réponse est: '+item.a + ' (' + item.why + ')';
+ document.querySelector('#quizFeedback').textContent=(currentLang==='ar'?'❌ إجابة خاطئة! الإجابة هي: ':currentLang==='en'?'❌ Incorrect! The answer is: ':'❌ Mauvaise réponse ! La réponse est: ')+localizeQuizText(item.a) + ' (' + localizeQuizText(item.why) + ')';
  }
 }
 
 document.querySelector('#quizNext').addEventListener('click',()=>{
  if(quizIndex>=quizOrder.length){startQuiz();return;}
- if(!quizAnswered){document.querySelector('#quizFeedback').textContent='Veuillez d\'abord sélectionner une réponse !';return;}
+ if(!quizAnswered){document.querySelector('#quizFeedback').textContent=currentLang==='ar'?'اختر إجابة أولًا من فضلك!':currentLang==='en'?'Please select an answer first!':'Veuillez d\'abord sélectionner une réponse !';return;}
  quizIndex++;renderQuestion();
 });
 document.querySelector('#quizRestart').addEventListener('click',startQuiz);
@@ -1421,6 +1599,8 @@ function applyLanguage(lang){currentLang=lang;const t=languageText[lang];documen
  const themeNames={default:lang==='fr'?'Normal / Défaut':lang==='en'?'Normal / Default':'عادي / افتراضي',red:lang==='fr'?'Rouge':lang==='en'?'Red':'أحمر',blue:lang==='fr'?'Bleu':lang==='en'?'Blue':'أزرق',black:lang==='fr'?'Noir':lang==='en'?'Black':'أسود',glass:'Liquid Glass'};
  document.querySelectorAll('[data-theme-name]').forEach(el=>el.textContent=themeNames[el.dataset.themeName]);
  document.querySelector('#mixerLaunch').textContent='🧪 '+(lang==='fr'?'Mixer de chimie':lang==='en'?'Chemistry Mixer':'خلاط الكيمياء');
+ const quizUI={fr:{games:'🎮 8 Jeux de Chimie',launch:'🎯 Lancer la Galerie des 8 Jeux Interactifs (Leçons 1 & 2)',modal:'Jeux & Révisions - Sciences 1ère Prep',mode:'🎯 Mode Quiz',category:'Sciences - 1ère Préparatoire',ready:'Prêt pour la question ?',choose:'Choisissez la bonne réponse.',next:'Question Suivante →',restart:'↻ Recommencer',return:'← Retour au Tableau Périodique'},en:{games:'🎮 8 Chemistry Games',launch:'🎯 Open the 8 Interactive Games (Lessons 1 & 2)',modal:'Games & Review - Grade 7 Science',mode:'🎯 Quiz Mode',category:'Science - Preparatory Year 1',ready:'Ready for the question?',choose:'Choose the correct answer.',next:'Next Question →',restart:'↻ Restart',return:'← Back to Periodic Table'},ar:{games:'🎮 ٨ ألعاب كيمياء',launch:'🎯 افتح الألعاب التفاعلية الثمانية (الدرسان ١ و٢)',modal:'الألعاب والمراجعة - علوم أولى إعدادي',mode:'🎯 وضع الاختبار',category:'علوم - الصف الأول الإعدادي',ready:'مستعد للسؤال؟',choose:'اختر الإجابة الصحيحة.',next:'السؤال التالي ←',restart:'↻ إعادة البدء',return:'← العودة إلى الجدول الدوري'}}[lang];
+ document.querySelector('#neonToggle').textContent=quizUI.games;document.querySelector('#quizLaunchButton').textContent=quizUI.launch;document.querySelector('#gameModalTitle').textContent=quizUI.modal;document.querySelector('#activeGameTitle').textContent=quizUI.mode;document.querySelector('#quizCategoryLabel').textContent=quizUI.category;document.querySelector('#quizNext').textContent=quizUI.next;document.querySelector('#quizRestart').textContent=quizUI.restart;document.querySelector('#returnTableButton').textContent=quizUI.return;if(!document.body.classList.contains('quiz-mode'))qEl.textContent=quizUI.ready;document.querySelector('#quizFeedback').textContent=quizUI.choose;document.querySelector('#closeGameModal').setAttribute('aria-label',lang==='ar'?'إغلاق':lang==='en'?'Close':'Fermer');
  document.querySelector('#mixerHelp').textContent=t.help;document.querySelector('#mixAddElement').textContent=t.add;document.querySelector('#mixCheck').textContent=t.check;document.querySelector('#mixExample').textContent=t.example;document.querySelector('#mixCatalogToggle').textContent=t.catalog;document.querySelector('#mixClose').textContent=t.close;document.querySelector('#catalogTitle').textContent=t.catalog;document.querySelector('#catalogDescription').textContent=lang==='fr'?'Les 118 éléments sont disponibles dans le mélangeur. Ce catalogue présente des exemples éducatifs de composés contenant deux éléments ou plus. Il ne peut pas recenser tous les composés et toutes les réactions chimiques ; une formule absente de la liste n’est pas nécessairement impossible.':lang==='en'?'All 118 elements are available in the mixer. This catalogue contains educational examples of compounds with two or more elements. It cannot list every compound or reaction; a formula missing from this list is not necessarily impossible.':'العناصر الـ118 متاحة في الخلاط. يعرض هذا الجدول أمثلة تعليمية لمركّبات تحتوي على عنصرين أو أكثر. لا يمكن حصر كل المركّبات والتفاعلات؛ وغياب صيغة من القائمة لا يعني أنها مستحيلة.';
  document.querySelector('#mixCatalogSearch').placeholder=lang==='fr'?'Rechercher par formule, élément ou composé…':lang==='en'?'Search by formula, element, or compound…':'ابحث بالصيغة أو العنصر أو المركّب…';document.querySelector('#mixCatalogSearch').setAttribute('aria-label',lang==='fr'?'Rechercher dans le catalogue':lang==='en'?'Search the catalogue':'البحث في الجدول');
  const headers=document.querySelectorAll('#mixerCatalog thead th');[t.formula,t.compound,t.atoms].forEach((x,i)=>{if(headers[i])headers[i].textContent=x});
